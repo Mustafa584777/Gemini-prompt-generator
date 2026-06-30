@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image to Gemini Prompt Generator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+          },
+        },
+      }
+    </script>
+    <!-- Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <style>
+      body {
+        background-color: #09090b;
+      }
+      /* Custom styled cropper workspace */
+      .cropper-container-wrapper {
+        background-color: #09090b;
+        background-image: radial-gradient(#27272a 1px, transparent 1px);
+        background-size: 16px 16px;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #3f3f46;
+        border-radius: 3px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #52525b;
+      }
+      
+      /* Smooth transitions for active styles */
+      .ratio-btn, .modifier-btn {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    </style>
+  </head>
+  <body class="font-sans antialiased text-zinc-100 min-h-screen flex flex-col bg-zinc-950">
+    <!-- Navigation Bar / Header -->
+    <header class="bg-zinc-950 border-b border-zinc-900 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black italic text-white text-lg shadow-md shadow-indigo-900/30">
+            G
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold tracking-tighter uppercase text-zinc-100">
+              Gemini<span class="text-indigo-500">Prompt</span>
+            </h1>
+            <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">Advanced Vision Transformer v3.5</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-6">
+          <div class="hidden md:flex flex-col items-end">
+            <span class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">API Latency</span>
+            <span class="text-xs font-mono text-emerald-400">142ms</span>
+          </div>
+          <div class="hidden md:block h-8 w-[1px] bg-zinc-800"></div>
+          <div class="flex flex-col items-end">
+            <span class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Model Engine</span>
+            <span class="text-xs font-mono text-indigo-400">Gemini 3.5 Flash</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Bento Grid -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        
+        <!-- Bento Card 1: Image Workspace Area (col-span-7) -->
+        <div class="lg:col-span-7 bg-zinc-900/50 border border-zinc-800/80 rounded-[2rem] p-6 shadow-xl flex flex-col gap-4 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-900/5 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div class="flex items-center justify-between z-10">
+            <div class="flex items-center gap-2">
+              <span class="p-1.5 bg-zinc-800 rounded-lg text-indigo-400 flex items-center justify-center">
+                <i data-lucide="image" class="w-4 h-4"></i>
+              </span>
+              <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400">Source Image Workspace</h2>
+            </div>
+            <span id="image-status-badge" class="hidden text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              Ready to crop
+            </span>
+          </div>
+
+          <!-- Drag and Drop Zone -->
+          <div id="drop-zone" class="border border-dashed border-zinc-800 hover:border-indigo-500/50 bg-zinc-900/20 hover:bg-zinc-900/40 rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[380px] flex-grow">
+            <input type="file" id="file-input" class="hidden" accept="image/*" />
+            <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow-inner mb-4 text-zinc-500">
+              <i data-lucide="upload-cloud" class="w-10 h-10 text-indigo-500"></i>
+            </div>
+            <p class="font-semibold text-zinc-200 text-base mb-1">Drag and drop your image here</p>
+            <p class="text-zinc-500 text-xs mb-6 tracking-wide">Supports PNG, JPG, JPEG, WEBP</p>
+            <button type="button" id="browse-btn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-indigo-900/20 transition-all active:scale-95">
+              Browse Files
+            </button>
+          </div>
+
+          <!-- Cropper Workspace Container (Hidden until image is loaded) -->
+          <div id="cropper-workspace" class="hidden flex flex-col gap-4 flex-grow z-10">
+            <div class="cropper-container-wrapper rounded-2xl overflow-hidden relative border border-zinc-800 flex items-center justify-center min-h-[350px] max-h-[480px]">
+              <img id="cropper-image" src="" alt="Source Image for cropping" class="max-w-full max-h-[480px]" />
+            </div>
+
+            <!-- Aspect Ratio Preset Controls -->
+            <div class="flex flex-col gap-2 bg-zinc-900/80 p-4 rounded-2xl border border-zinc-800/60">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Aspect Ratio Selector</span>
+              <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                <button type="button" data-aspect-ratio="NaN" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                  Free Form
+                </button>
+                <button type="button" data-aspect-ratio="1" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                  1:1 Sq
+                </button>
+                <button type="button" data-aspect-ratio="1.3333" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                  4:3 Photo
+                </button>
+                <button type="button" data-aspect-ratio="1.7777" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                  16:9 Cinematic
+                </button>
+                <button type="button" data-aspect-ratio="0.5625" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                  9:16 Portrait
+                </button>
+              </div>
+            </div>
+
+            <!-- Fine-Tuning Controls toolbar -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <div class="flex items-center gap-1.5 bg-zinc-900/60 p-1 rounded-xl border border-zinc-800/60">
+                <button type="button" id="rotate-left" title="Rotate Left 90°" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
+                  <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+                <button type="button" id="rotate-right" title="Rotate Right 90°" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
+                  <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                </button>
+                <div class="h-5 w-[1px] bg-zinc-800 mx-1"></div>
+                <button type="button" id="flip-h" title="Flip Horizontal" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
+                  <i data-lucide="flip-horizontal" class="w-4 h-4"></i>
+                </button>
+                <button type="button" id="flip-v" title="Flip Vertical" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
+                  <i data-lucide="flip-vertical" class="w-4 h-4"></i>
+                </button>
+                <div class="h-5 w-[1px] bg-zinc-800 mx-1"></div>
+                <button type="button" id="reset-crop" title="Reset Image to Default" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 rounded-lg transition-colors">
+                  <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <div>
+                <button type="button" id="change-image-btn" class="px-4 py-2.5 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700/60 transition-all">
+                  Swap Image
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bento Card 2: Settings & Generation Parameters (col-span-5) -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+          
+          <!-- Generator Parameters Panel -->
+          <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-[2rem] p-6 shadow-xl flex flex-col gap-4 relative overflow-hidden">
+            <div class="flex items-center gap-2 z-10">
+              <span class="p-1.5 bg-zinc-800 rounded-lg text-indigo-400 flex items-center justify-center">
+                <i data-lucide="sliders" class="w-4 h-4"></i>
+              </span>
+              <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400">Generator Configuration</h2>
+            </div>
+
+            <!-- Prompt Style Selection -->
+            <div class="flex flex-col gap-2 z-10">
+              <label for="prompt-style" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Output Style Tuning</label>
+              <select id="prompt-style" class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl px-4 py-3.5 text-sm text-zinc-200 outline-none cursor-pointer transition-colors">
+                <option value="descriptive">Detailed Description (Standard Analysis)</option>
+                <option value="recreation">Perfect AI Recreation (Midjourney/DALL-E Prompt)</option>
+                <option value="artistic">Artistic & Cinematic Focus (Styles & Moods)</option>
+                <option value="minimalist">Minimalist (Short & Punchy Description)</option>
+              </select>
+            </div>
+
+            <!-- Prompt Modifiers presets -->
+            <div class="flex flex-col gap-2.5 z-10">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Quick Style Modifiers</span>
+                <button type="button" id="clear-modifiers-btn" class="text-[9px] uppercase tracking-widest text-zinc-500 hover:text-zinc-300 font-bold">Clear All</button>
+              </div>
+              <div class="flex flex-wrap gap-1.5 max-h-[140px] overflow-y-auto custom-scrollbar pr-1">
+                <!-- Lighting Presets -->
+                <button type="button" data-modifier="dramatic golden hour lighting" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🌅 Golden Hour</button>
+                <button type="button" data-modifier="neon cyberpunk synthwave lighting" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🌌 Cyberpunk Neon</button>
+                <button type="button" data-modifier="moody cinematic volumetric fog and film grain" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🎬 Cinematic Moody</button>
+                <button type="button" data-modifier="soft studio portrait lighting with bokeh background" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">📸 Studio Bokeh</button>
+                <!-- Style presets -->
+                <button type="button" data-modifier="ultra-detailed oil painting masterpiece art style" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🖌️ Oil Painting</button>
+                <button type="button" data-modifier="clean minimalist line-art aesthetic" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">✏️ Line-Art</button>
+                <button type="button" data-modifier="vibrant watercolor and ink wash illustration style" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🎨 Watercolor Ink</button>
+                <button type="button" data-modifier="photorealistic 8k octane render hyper-detailed texture" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">⚡ Hyper-Real</button>
+              </div>
+            </div>
+
+            <!-- Custom Instructions input field -->
+            <div class="flex flex-col gap-2 z-10">
+              <label for="custom-instructions" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Custom Instructions (Optional)</label>
+              <textarea id="custom-instructions" rows="3" placeholder="Specify Leica camera configurations, focus textures, hyperreal settings, etc..." class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-zinc-200 outline-none resize-none placeholder-zinc-700 transition-colors"></textarea>
+            </div>
+
+            <!-- Generate Button -->
+            <button type="button" id="generate-btn" disabled class="w-full py-4 bg-zinc-800/40 text-zinc-700 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 border border-zinc-800/60 transition-all duration-200">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span>Generate Prompt</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bento Card 3: High Contrast Full-Width Generated Output Block -->
+      <div id="output-container" class="bg-zinc-900/50 border border-zinc-800/80 text-zinc-100 rounded-[2.5rem] p-6 sm:p-8 flex flex-col gap-6 shadow-xl relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-indigo-950/10 via-transparent to-transparent pointer-events-none"></div>
+        
+        <div class="flex items-center justify-between z-10">
+          <div class="flex items-center gap-3">
+            <h3 class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Generated Output</h3>
+            <div id="output-state-badge" class="px-2 py-0.5 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[9px] font-bold uppercase tracking-wider rounded-full">
+              Waiting for Input
+            </div>
+          </div>
+          
+          <div id="prompt-stats" class="hidden flex items-center gap-2 text-zinc-500 text-xs font-mono">
+            <span id="char-count">0 chars</span>
+            <span>•</span>
+            <span id="word-count">0 words</span>
+          </div>
+        </div>
+
+        <div class="relative min-h-[140px] flex flex-col z-10">
+          
+          <!-- Empty State visual -->
+          <div id="output-empty" class="absolute inset-0 flex flex-col items-center justify-center text-center py-8">
+            <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-xl mb-3 text-zinc-500">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <p class="text-zinc-300 font-bold text-sm tracking-wide">Ready for analysis</p>
+            <p class="text-zinc-600 text-xs mt-1">Upload an image and hit Generate to render the perfect prompt.</p>
+          </div>
+
+          <!-- Loading Skeleton -->
+          <div id="output-loading" class="hidden absolute inset-0 flex flex-col gap-3 justify-center">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="inline-block w-4 h-4 rounded-full bg-indigo-500 animate-spin border-2 border-zinc-950 border-t-transparent"></span>
+              <p class="text-zinc-400 text-xs font-bold tracking-wide uppercase animate-pulse">Gemini analyzing lighting, textures & style elements...</p>
+            </div>
+            <div class="h-4 bg-zinc-800/60 rounded-md w-full animate-pulse"></div>
+            <div class="h-4 bg-zinc-800/60 rounded-md w-[94%] animate-pulse"></div>
+            <div class="h-4 bg-zinc-800/60 rounded-md w-[80%] animate-pulse"></div>
+          </div>
+
+          <!-- Real Generated Prompt Display -->
+          <div id="output-display" class="hidden flex-grow flex flex-col sm:flex-row gap-6 items-center justify-between">
+            <div class="flex-grow w-full select-text text-left">
+              <p id="generated-prompt-text" class="text-lg sm:text-xl font-medium leading-relaxed italic tracking-tight text-zinc-100 font-sans whitespace-pre-wrap select-text"></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 shrink-0 w-full sm:w-auto">
+              <button type="button" id="copy-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-lg shadow-indigo-900/30 uppercase text-xs tracking-widest shrink-0">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+                <span>Copy Prompt</span>
+              </button>
+              <button type="button" id="re-generate-btn" class="text-xs font-bold text-zinc-400 uppercase tracking-widest hover:text-white transition-colors bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700 py-4 px-5 rounded-2xl flex items-center justify-center" title="Re-generate prompt">
+                <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Error Toast Notification -->
+    <div id="error-toast" class="fixed bottom-6 right-6 z-50 bg-rose-650 text-white border border-rose-800/50 px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md transform translate-y-24 opacity-0 pointer-events-none transition-all duration-350 bg-zinc-900">
+      <div class="bg-rose-900/30 border border-rose-700/50 p-2 rounded-xl text-rose-400">
+        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+      </div>
+      <div class="flex-grow">
+        <p class="text-xs font-bold uppercase tracking-wider text-rose-400">System Error</p>
+        <p id="error-message" class="text-xs text-zinc-400 mt-0.5">Could not process image</p>
+      </div>
+      <button type="button" id="close-toast" class="text-zinc-500 hover:text-zinc-200 transition-colors">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-zinc-950 border-t border-zinc-900 py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[9px] text-zinc-600 font-mono uppercase tracking-widest">
+        <div>System State: Optimal // Build v3.5.0</div>
+        <div>Local Device Node: GPU-ACCELERATED</div>
+      </div>
+    </footer>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Cropper.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
+    <script>
+      // Initialize vector icons
+      lucide.createIcons();
+
+      // State Management
+      let originalImageBase64 = null;
+      let originalMimeType = null;
+      let cropperInstance = null;
+      let selectedModifiers = new Set();
+
+      // DOM Elements Selection
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('file-input');
+      const browseBtn = document.getElementById('browse-btn');
+      const cropperWorkspace = document.getElementById('cropper-workspace');
+      const cropperImage = document.getElementById('cropper-image');
+      const imageStatusBadge = document.getElementById('image-status-badge');
+      const changeImageBtn = document.getElementById('change-image-btn');
+
+      // Cropper Control Buttons
+      const rotateLeftBtn = document.getElementById('rotate-left');
+      const rotateRightBtn = document.getElementById('rotate-right');
+      const flipHBtn = document.getElementById('flip-h');
+      const flipVBtn = document.getElementById('flip-v');
+      const resetCropBtn = document.getElementById('reset-crop');
+      const ratioButtons = document.querySelectorAll('.ratio-btn');
+
+      // Generation Inputs
+      const promptStyleSelect = document.getElementById('prompt-style');
+      const customInstructionsInput = document.getElementById('custom-instructions');
+      const modifierButtons = document.querySelectorAll('.modifier-btn');
+      const clearModifiersBtn = document.getElementById('clear-modifiers-btn');
+      const generateBtn = document.getElementById('generate-btn');
+
+      // Outputs
+      const outputEmpty = document.getElementById('output-empty');
+      const outputLoading = document.getElementById('output-loading');
+      const outputDisplay = document.getElementById('output-display');
+      const generatedPromptText = document.getElementById('generated-prompt-text');
+      const promptStats = document.getElementById('prompt-stats');
+      const charCountSpan = document.getElementById('char-count');
+      const wordCountSpan = document.getElementById('word-count');
+      const copyBtn = document.getElementById('copy-btn');
+      const reGenerateBtn = document.getElementById('re-generate-btn');
+      const outputStateBadge = document.getElementById('output-state-badge');
+
+      // Toast Notification Elements
+      const errorToast = document.getElementById('error-toast');
+      const errorMessage = document.getElementById('error-message');
+      const closeToastBtn = document.getElementById('close-toast');
+
+      // --- Drag & Drop Handlers ---
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('border-indigo-500', 'bg-indigo-950/10');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('border-indigo-500', 'bg-indigo-950/10');
+        }, false);
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+          handleSelectedFile(files[0]);
+        }
+      });
+
+      browseBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          handleSelectedFile(e.target.files[0]);
+        }
+      });
+
+      changeImageBtn.addEventListener('click', () => {
+        // Destroy existing cropper instance
+        if (cropperInstance) {
+          cropperInstance.destroy();
+          cropperInstance = null;
+        }
+        // Reset states
+        originalImageBase64 = null;
+        originalMimeType = null;
+        cropperImage.src = "";
+        
+        // Toggle view visibility
+        cropperWorkspace.classList.add('hidden');
+        dropZone.classList.remove('hidden');
+        imageStatusBadge.classList.add('hidden');
+        
+        // Reset generate button state
+        updateGenerateButtonState();
+        fileInput.value = "";
+      });
+
+      // --- File Reading and Cropper Setup ---
+      function handleSelectedFile(file) {
+        if (!file.type.startsWith('image/')) {
+          showToast('Unsupported format', 'Please select a valid image file.');
+          return;
+        }
+
+        originalMimeType = file.type;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          originalImageBase64 = e.target.result;
+          
+          // Show the cropper workspace
+          dropZone.classList.add('hidden');
+          cropperWorkspace.classList.remove('hidden');
+          imageStatusBadge.classList.remove('hidden');
+          
+          // Setup Image
+          cropperImage.src = originalImageBase64;
+          
+          // Destroy old cropper if any
+          if (cropperInstance) {
+            cropperInstance.destroy();
+          }
+
+          // Initialize Cropper.js
+          setTimeout(() => {
+            cropperInstance = new Cropper(cropperImage, {
+              viewMode: 1,
+              dragMode: 'move',
+              autoCropArea: 0.9,
+              restore: false,
+              guides: true,
+              center: true,
+              highlight: false,
+              cropBoxMovable: true,
+              cropBoxResizable: true,
+              toggleDragModeOnDblclick: false,
+              ready() {
+                // Done loading
+                updateGenerateButtonState();
+              }
+            });
+          }, 50);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // --- Cropper Control Handlers ---
+      rotateLeftBtn.addEventListener('click', () => {
+        if (cropperInstance) cropperInstance.rotate(-90);
+      });
+
+      rotateRightBtn.addEventListener('click', () => {
+        if (cropperInstance) cropperInstance.rotate(90);
+      });
+
+      let isFlippedH = false;
+      flipHBtn.addEventListener('click', () => {
+        if (cropperInstance) {
+          isFlippedH = !isFlippedH;
+          cropperInstance.scaleX(isFlippedH ? -1 : 1);
+        }
+      });
+
+      let isFlippedV = false;
+      flipVBtn.addEventListener('click', () => {
+        if (cropperInstance) {
+          isFlippedV = !isFlippedV;
+          cropperInstance.scaleY(isFlippedV ? -1 : 1);
+        }
+      });
+
+      resetCropBtn.addEventListener('click', () => {
+        if (cropperInstance) {
+          cropperInstance.reset();
+          isFlippedH = false;
+          isFlippedV = false;
+          cropperInstance.scale(1, 1);
+          
+          // Reset ratio button styling
+          ratioButtons.forEach(btn => {
+            btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+            btn.classList.add('bg-zinc-800', 'text-zinc-300');
+          });
+          ratioButtons[0].classList.remove('bg-zinc-800', 'text-zinc-300');
+          ratioButtons[0].classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+          cropperInstance.setAspectRatio(NaN);
+        }
+      });
+
+      // Aspect Ratio Selectors Click
+      ratioButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          if (!cropperInstance) return;
+
+          // Remove active styles from all
+          ratioButtons.forEach(btn => {
+            btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+            btn.classList.add('bg-zinc-800', 'text-zinc-300');
+          });
+
+          // Add active styles to clicked
+          button.classList.remove('bg-zinc-800', 'text-zinc-300');
+          button.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+
+          const ratioValue = parseFloat(button.getAttribute('data-aspect-ratio'));
+          cropperInstance.setAspectRatio(isNaN(ratioValue) ? NaN : ratioValue);
+        });
+      });
+
+      // Style active Free Form ratio by default on load
+      ratioButtons[0].classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+      ratioButtons[0].classList.remove('bg-zinc-800', 'text-zinc-300');
+
+      // --- Modifiers Selection ---
+      modifierButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const modifierText = btn.getAttribute('data-modifier');
+          
+          if (selectedModifiers.has(modifierText)) {
+            selectedModifiers.delete(modifierText);
+            btn.classList.remove('bg-indigo-950/60', 'text-indigo-400', 'border-indigo-500/50');
+            btn.classList.add('bg-zinc-800/60', 'text-zinc-400', 'border-zinc-800');
+          } else {
+            selectedModifiers.add(modifierText);
+            btn.classList.remove('bg-zinc-800/60', 'text-zinc-400', 'border-zinc-800');
+            btn.classList.add('bg-indigo-950/60', 'text-indigo-400', 'border-indigo-500/50');
+          }
+
+          updateCustomInstructionsText();
+        });
+      });
+
+      clearModifiersBtn.addEventListener('click', () => {
+        selectedModifiers.clear();
+        modifierButtons.forEach(btn => {
+          btn.classList.remove('bg-indigo-950/60', 'text-indigo-400', 'border-indigo-500/50');
+          btn.classList.add('bg-zinc-800/60', 'text-zinc-400', 'border-zinc-800');
+        });
+        customInstructionsInput.value = "";
+      });
+
+      function updateCustomInstructionsText() {
+        if (selectedModifiers.size === 0) {
+          customInstructionsInput.value = "";
+          return;
+        }
+        
+        const modifiersArray = Array.from(selectedModifiers);
+        customInstructionsInput.value = "Render style guidelines: " + modifiersArray.join(", ") + ".";
+      }
+
+      // --- Button Enabling State ---
+      function updateGenerateButtonState() {
+        if (originalImageBase64) {
+          generateBtn.disabled = false;
+          generateBtn.classList.remove('bg-zinc-800/40', 'text-zinc-700', 'cursor-not-allowed', 'border-zinc-800/60');
+          generateBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500', 'text-white', 'cursor-pointer', 'shadow-lg', 'shadow-indigo-900/30', 'border-indigo-500');
+        } else {
+          generateBtn.disabled = true;
+          generateBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500', 'text-white', 'shadow-lg', 'shadow-indigo-900/30', 'border-indigo-500');
+          generateBtn.classList.add('bg-zinc-800/40', 'text-zinc-700', 'cursor-not-allowed', 'border-zinc-800/60');
+        }
+      }
+
+      // --- Prompt Copy Feature ---
+      copyBtn.addEventListener('click', async () => {
+        const textToCopy = generatedPromptText.textContent;
+        if (!textToCopy) return;
+
+        try {
+          await navigator.clipboard.writeText(textToCopy);
+          
+          // Temporary Visual feedback on Copy
+          const originalHTML = copyBtn.innerHTML;
+          copyBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i><span>Copied!</span>`;
+          copyBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+          copyBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+          lucide.createIcons();
+
+          setTimeout(() => {
+            copyBtn.innerHTML = originalHTML;
+            copyBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+            copyBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+            lucide.createIcons();
+          }, 2000);
+        } catch (err) {
+          showToast('Failed to copy', 'Could not copy the text automatically.');
+        }
+      });
+
+      // --- Gemini Prompt Generation Trigger ---
+      generateBtn.addEventListener('click', generatePrompt);
+      reGenerateBtn.addEventListener('click', generatePrompt);
+
+      async function generatePrompt() {
+        if (!originalImageBase64) return;
+
+        // Visual state: Loading
+        setLoadingState(true);
+
+        try {
+          // Extract the cropped canvas image as jpeg (compressed for API transfer speed)
+          let finalBase64Image = originalImageBase64;
+          if (cropperInstance) {
+            finalBase64Image = cropperInstance.getCroppedCanvas({
+              maxWidth: 1200, // Optimize size for rapid Gemini API response times
+              maxHeight: 1200,
+              imageSmoothingEnabled: true,
+              imageSmoothingQuality: 'high',
+            }).toDataURL('image/jpeg', 0.85);
+          }
+
+          const response = await fetch('/api/generate-prompt', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              image: finalBase64Image,
+              mimeType: 'image/jpeg',
+              promptType: promptStyleSelect.value,
+              customInstructions: customInstructionsInput.value
+            })
+          });
+
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error || `HTTP error ${response.status}`);
+          }
+
+          const data = await response.json();
+          displayGeneratedPrompt(data.prompt);
+
+        } catch (error) {
+          console.error("Failed to generate prompt:", error);
+          showToast('Prompt Generation Failed', error.message || 'Gemini encountered an issue analyzing the image.');
+          setLoadingState(false);
+        }
+      }
+
+      function setLoadingState(isLoading) {
+        if (isLoading) {
+          // Disable interactive elements
+          generateBtn.disabled = true;
+          generateBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Generating...`;
+          reGenerateBtn.disabled = true;
+          
+          // Toggle output box visual states
+          outputEmpty.classList.add('hidden');
+          outputDisplay.classList.add('hidden');
+          outputLoading.classList.remove('hidden');
+          promptStats.classList.add('hidden');
+
+          // Update state badge
+          outputStateBadge.textContent = "Analyzing...";
+          outputStateBadge.className = "px-2 py-0.5 bg-indigo-950 border border-indigo-900 text-indigo-400 text-[9px] font-bold uppercase tracking-wider rounded-full animate-pulse";
+        } else {
+          updateGenerateButtonState();
+          generateBtn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 mr-2"></i>Generate Prompt`;
+          reGenerateBtn.disabled = false;
+          lucide.createIcons();
+        }
+      }
+
+      function displayGeneratedPrompt(promptText) {
+        // Clear loading state visuals
+        setLoadingState(false);
+        outputLoading.classList.add('hidden');
+        
+        // Set values and configure stats
+        generatedPromptText.textContent = `"${promptText.trim()}"`;
+        
+        // Count chars and words
+        const trimmed = promptText.trim();
+        const charCount = trimmed.length;
+        const wordCount = trimmed === "" ? 0 : trimmed.split(/\s+/).length;
+        
+        charCountSpan.textContent = `${charCount} chars`;
+        wordCountSpan.textContent = `${wordCount} words`;
+
+        // Reveal layout
+        outputDisplay.classList.remove('hidden');
+        promptStats.classList.remove('hidden');
+
+        // Update state badge
+        outputStateBadge.textContent = "Ready to use";
+        outputStateBadge.className = "px-2 py-0.5 bg-emerald-950 border border-emerald-900 text-emerald-400 text-[9px] font-bold uppercase tracking-wider rounded-full";
+
+        // Scroll layout to read response smoothly on mobile
+        document.getElementById('output-container').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // --- Toast Notification Helpers ---
+      let toastTimeout = null;
+      function showToast(title, description) {
+        // Set messaging
+        errorToast.querySelector('p.text-rose-400').textContent = title;
+        errorMessage.textContent = description;
+
+        // Bring animation in
+        errorToast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+        errorToast.classList.add('translate-y-0', 'opacity-100');
+
+        // Automatic dismiss after 5s
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(hideToast, 5000);
+      }
+
+      function hideToast() {
+        errorToast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+        errorToast.classList.remove('translate-y-0', 'opacity-100');
+      }
+
+      closeToastBtn.addEventListener('click', hideToast);
+    </script>
+  </body>
+</html>
