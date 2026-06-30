@@ -7,7 +7,9 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { image, mimeType, promptType, customInstructions } = req.body;
+    // Defensive body parsing
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { image, mimeType, promptType, customInstructions } = body || {};
 
     if (!image) {
       return res.status(400).json({ error: "Missing image data" });
