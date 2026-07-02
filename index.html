@@ -8,32 +8,45 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              mono: ['JetBrains Mono', 'monospace'],
-            },
-          },
-        },
-      }
-    </script>
+    
     <!-- Cropper.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    
+    <!-- Complete, highly optimized custom CSS styling compiled locally inside style tag -->
     <style>
-      body {
-        background-color: #09090b;
+      /* Reset & Base Setup */
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-      /* Custom styled cropper workspace */
-      .cropper-container-wrapper {
-        background-color: #09090b;
-        background-image: radial-gradient(#27272a 1px, transparent 1px);
-        background-size: 16px 16px;
+      
+      :root {
+        --bg-main: #09090b;
+        --bg-card: rgba(24, 24, 27, 0.5);
+        --bg-inner: #18181b;
+        --border-color: rgba(39, 39, 42, 0.8);
+        --text-primary: #f4f4f5;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --accent: #4f46e5;
+        --accent-hover: #6366f1;
+        --accent-light: rgba(79, 70, 229, 0.1);
+        --emerald: #34d399;
+        --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
       }
+
+      html, body {
+        height: 100%;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Custom Scrollbars */
       .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
         height: 6px;
@@ -48,11 +61,269 @@
       .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         background: #52525b;
       }
+
+      /* Image Cropper Canvas workspace background pattern */
+      .cropper-container-wrapper {
+        background-color: #09090b;
+        background-image: radial-gradient(#27272a 1px, transparent 1px);
+        background-size: 16px 16px;
+      }
+
+      /* Pure CSS Utility Framework Replacement */
+      .flex { display: flex; }
+      .flex-col { flex-direction: column; }
+      .flex-row { flex-direction: row; }
+      .items-center { align-items: center; }
+      .justify-between { justify-content: space-between; }
+      .justify-center { justify-content: center; }
+      .flex-grow { flex-grow: 1; }
+      .flex-wrap { flex-wrap: wrap; }
+      .shrink-0 { flex-shrink: 0; }
       
-      /* Smooth transitions for active styles */
+      .grid { display: grid; }
+      .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+      
+      @media (min-width: 1024px) {
+        .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+        .lg\:col-span-7 { grid-column: span 7 / span 7; }
+        .lg\:col-span-5 { grid-column: span 5 / span 5; }
+      }
+      
+      .gap-1\.5 { gap: 0.375rem; }
+      .gap-2 { gap: 0.5rem; }
+      .gap-2\.5 { gap: 0.625rem; }
+      .gap-3 { gap: 0.75rem; }
+      .gap-4 { gap: 1rem; }
+      .gap-6 { gap: 1.5rem; }
+      .items-stretch { align-items: stretch; }
+      
+      /* Sizing and Spacers */
+      .w-full { width: 100%; }
+      .h-full { height: 100%; }
+      .min-h-screen { min-height: 100vh; }
+      .max-w-7xl { max-width: 80rem; }
+      .mx-auto { margin-left: auto; margin-right: auto; }
+      .mt-auto { margin-top: auto; }
+      .mt-0\.5 { margin-top: 0.125rem; }
+      .mb-1 { margin-bottom: 0.25rem; }
+      .mb-2 { margin-bottom: 0.5rem; }
+      .mb-3 { margin-bottom: 0.75rem; }
+      .mb-4 { margin-bottom: 1rem; }
+      .mb-6 { margin-bottom: 1.5rem; }
+      
+      .w-10 { width: 2.5rem; }
+      .h-10 { height: 2.5rem; }
+      .h-20 { height: 5rem; }
+      .h-8 { height: 2rem; }
+      .w-4 { width: 1rem; }
+      .h-4 { height: 1rem; }
+      .w-5 { width: 1.25rem; }
+      .h-5 { height: 1.25rem; }
+      .w-64 { width: 16rem; }
+      .h-64 { height: 16rem; }
+      .w-\[1px\] { width: 1px; }
+      
+      .min-h-\[350px\] { min-height: 350px; }
+      .min-h-\[380px\] { min-height: 380px; }
+      .min-h-\[140px\] { min-height: 140px; }
+      .max-h-\[480px\] { max-height: 480px; }
+      .max-h-\[140px\] { max-height: 140px; }
+      
+      /* Padding Utility library */
+      .p-1 { padding: 0.25rem; }
+      .p-1\.5 { padding: 0.375rem; }
+      .p-2\.5 { padding: 0.625rem; }
+      .p-3 { padding: 0.75rem; }
+      .p-4 { padding: 1rem; }
+      .p-5 { padding: 1.25rem; }
+      .p-6 { padding: 1.5rem; }
+      .p-8 { padding: 2rem; }
+      .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+      .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+      .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+      .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+      .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+      .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+      .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+      .py-3\.5 { padding-top: 0.875rem; padding-bottom: 0.875rem; }
+      .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+      .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+      .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+      .px-4 { padding-left: 1rem; padding-right: 1rem; }
+      .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .px-8 { padding-left: 2rem; padding-right: 2rem; }
+      
+      @media (min-width: 640px) {
+        .sm\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .sm\:p-8 { padding: 2rem; }
+        .sm\:flex-row { flex-direction: row; }
+        .sm\:w-auto { width: auto; }
+      }
+      @media (min-width: 1024px) {
+        .lg\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+        .lg\:py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+      }
+      
+      /* Borders & Corners styling */
+      .border { border: 1px solid #27272a; }
+      .border-b { border-bottom: 1px solid #18181b; }
+      .border-t { border-top: 1px solid #18181b; }
+      .border-dashed { border-style: dashed; }
+      .border-zinc-900 { border-color: #18181b; }
+      .border-zinc-800\/80 { border-color: rgba(39, 39, 42, 0.8); }
+      .border-zinc-800\/60 { border-color: rgba(39, 39, 42, 0.6); }
+      .border-zinc-800 { border-color: #27272a; }
+      .border-zinc-700\/60 { border-color: rgba(63, 63, 70, 0.6); }
+      .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.2); }
+      
+      .rounded-lg { border-radius: 0.5rem; }
+      .rounded-xl { border-radius: 0.75rem; }
+      .rounded-2xl { border-radius: 1rem; }
+      .rounded-\[2rem\] { border-radius: 2rem; }
+      .rounded-\[2\.5rem\] { border-radius: 2.5rem; }
+      
+      /* Typography System */
+      .font-sans { font-family: var(--font-sans); }
+      .font-mono { font-family: var(--font-mono); }
+      
+      .text-xs { font-size: 0.75rem; }
+      .text-sm { font-size: 0.875rem; }
+      .text-base { font-size: 1rem; }
+      .text-lg { font-size: 1.125rem; }
+      .text-xl { font-size: 1.25rem; }
+      .text-\[10px\] { font-size: 10px; }
+      .text-\[9px\] { font-size: 9px; }
+      
+      .font-bold { font-weight: 700; }
+      .font-semibold { font-weight: 600; }
+      .font-medium { font-weight: 500; }
+      .font-black { font-weight: 900; }
+      
+      .uppercase { text-transform: uppercase; }
+      .italic { font-style: italic; }
+      .tracking-tight { letter-spacing: -0.025em; }
+      .tracking-tighter { letter-spacing: -0.05em; }
+      .tracking-wide { letter-spacing: 0.025em; }
+      .tracking-widest { letter-spacing: 0.1em; }
+      .leading-none { line-height: 1; }
+      .leading-relaxed { line-height: 1.625; }
+      
+      /* Colors and Tones */
+      .text-zinc-100 { color: #f4f4f5; }
+      .text-zinc-200 { color: #e4e4e7; }
+      .text-zinc-300 { color: #d4d4d8; }
+      .text-zinc-400 { color: #a1a1aa; }
+      .text-zinc-500 { color: #71717a; }
+      .text-zinc-600 { color: #52525b; }
+      .text-zinc-700 { color: #3f3f46; }
+      .text-indigo-500 { color: #6366f1; }
+      .text-indigo-400 { color: #818cf8; }
+      .text-emerald-400 { color: #34d399; }
+      .text-rose-400 { color: #f87171; }
+      
+      /* Solid & Semi-transparent Background classes */
+      .bg-zinc-950 { background-color: #09090b; }
+      .bg-zinc-900\/50 { background-color: rgba(24, 24, 27, 0.5); }
+      .bg-zinc-900\/20 { background-color: rgba(24, 24, 27, 0.2); }
+      .bg-zinc-900\/80 { background-color: rgba(24, 24, 27, 0.8); }
+      .bg-zinc-900\/60 { background-color: rgba(24, 24, 27, 0.6); }
+      .bg-zinc-900 { background-color: #18181b; }
+      .bg-zinc-800 { background-color: #27272a; }
+      .bg-zinc-800\/80 { background-color: rgba(39, 39, 42, 0.8); }
+      .bg-zinc-800\/60 { background-color: rgba(39, 39, 42, 0.6); }
+      .bg-zinc-800\/40 { background-color: rgba(39, 39, 42, 0.4); }
+      .bg-indigo-600 { background-color: #4f46e5; }
+      .bg-indigo-900\/5 { background-color: rgba(49, 46, 129, 0.05); }
+      .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.1); }
+      
+      /* Layout & Structural Layout Elements */
+      .sticky { position: sticky; }
+      .top-0 { top: 0; }
+      .z-40 { z-index: 40; }
+      .z-50 { z-index: 50; }
+      .relative { position: relative; }
+      .absolute { position: absolute; }
+      .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+      .overflow-hidden { overflow: hidden; }
+      .overflow-y-auto { overflow-y: auto; }
+      .blur-3xl { filter: blur(64px); }
+      .pointer-events-none { pointer-events: none; }
+      
+      /* Interactive States & Transitions */
       .ratio-btn, .modifier-btn {
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       }
+      .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+      .duration-200 { transition-duration: 200ms; }
+      .duration-350 { transition-duration: 350ms; }
+      
+      .hover\:bg-indigo-500:hover { background-color: #6366f1; }
+      .hover\:bg-zinc-750:hover { background-color: #333336; }
+      .hover\:bg-zinc-700\/80:hover { background-color: rgba(63, 63, 70, 0.8); }
+      .hover\:text-zinc-100:hover { color: #f4f4f5; }
+      .hover\:scale-\[1\.02\]:hover { transform: scale(1.02); }
+      .hover\:border-indigo-500\/50:hover { border-color: rgba(99, 102, 241, 0.5); }
+      .hover\:text-white:hover { color: #ffffff; }
+      .hover\:text-zinc-200:hover { color: #e4e4e7; }
+      .active\:scale-95:active { transform: scale(0.95); }
+      
+      /* Dynamic classes added & modified by Javascript */
+      .bg-indigo-600 { background-color: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
+      .text-white { color: #ffffff !important; }
+      .border-indigo-600 { border-color: var(--accent) !important; }
+      .bg-zinc-800 { background-color: #27272a !important; color: #d4d4d8 !important; }
+      .text-zinc-300 { color: #d4d4d8 !important; }
+      
+      .bg-indigo-950\/60 { background-color: rgba(30, 27, 75, 0.6) !important; color: #818cf8 !important; border-color: rgba(99, 102, 241, 0.5) !important; }
+      .text-indigo-400 { color: #818cf8 !important; }
+      .border-indigo-500\/50 { border-color: rgba(99, 102, 241, 0.5) !important; }
+      
+      .bg-zinc-800\/60 { background-color: rgba(39, 39, 42, 0.6) !important; color: #a1a1aa !important; border-color: #27272a !important; }
+      .text-zinc-400 { color: #a1a1aa !important; }
+      .border-zinc-800 { border-color: #27272a !important; }
+      
+      /* Loading & State badges toggled by JS */
+      .bg-indigo-950 { background-color: rgba(30, 27, 75, 0.8) !important; border-color: rgba(99, 102, 241, 0.3) !important; color: #818cf8 !important; }
+      .border-indigo-900 { border-color: rgba(49, 46, 129, 0.8) !important; }
+      .bg-emerald-950 { background-color: rgba(6, 78, 59, 0.8) !important; border-color: rgba(16, 185, 129, 0.3) !important; color: #34d399 !important; }
+      .border-emerald-900 { border-color: rgba(6, 95, 70, 0.8) !important; }
+      
+      /* Button Copy States */
+      .bg-emerald-600 { background-color: #059669 !important; }
+      .hover\:bg-emerald-500:hover { background-color: #10b981 !important; }
+
+      /* Animation keyframes */
+      .animate-spin {
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+      
+      /* Depth & Shadows */
+      .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+      .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+      .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+      .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+      .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+      .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+      
+      /* Helpful Classes */
+      .hidden { display: none !important; }
+      .cursor-pointer { cursor: pointer; }
+      .cursor-not-allowed { cursor: not-allowed; }
+      .select-text { user-select: text; }
+      .text-left { text-align: left; }
+      .whitespace-pre-wrap { white-space: pre-wrap; }
     </style>
   </head>
   <body class="font-sans antialiased text-zinc-100 min-h-screen flex flex-col bg-zinc-950">
@@ -60,11 +331,11 @@
     <header class="bg-zinc-950 border-b border-zinc-900 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black italic text-white text-lg shadow-md shadow-indigo-900/30">
+          <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black italic text-white text-lg shadow-md">
             G
           </div>
           <div>
-            <h1 class="text-lg sm:text-xl font-bold tracking-tighter uppercase text-zinc-100">
+            <h1 class="text-lg font-bold tracking-tighter uppercase text-zinc-100">
               Gemini<span class="text-indigo-500">Prompt</span>
             </h1>
             <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">Advanced Vision Transformer v3.5</p>
@@ -72,11 +343,11 @@
         </div>
         
         <div class="flex items-center gap-6">
-          <div class="hidden md:flex flex-col items-end">
+          <div class="hidden sm:flex flex-col items-end">
             <span class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">API Latency</span>
             <span class="text-xs font-mono text-emerald-400">142ms</span>
           </div>
-          <div class="hidden md:block h-8 w-[1px] bg-zinc-800"></div>
+          <div class="hidden sm:block h-8 w-\[1px\] bg-zinc-800"></div>
           <div class="flex flex-col items-end">
             <span class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Model Engine</span>
             <span class="text-xs font-mono text-indigo-400">Gemini 3.5 Flash</span>
@@ -91,57 +362,57 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
         <!-- Bento Card 1: Image Workspace Area (col-span-7) -->
-        <div class="lg:col-span-7 bg-zinc-900/50 border border-zinc-800/80 rounded-[2rem] p-6 shadow-xl flex flex-col gap-4 relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-900/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="lg:col-span-7 bg-zinc-900\/50 border border-zinc-800\/80 rounded-\[2rem\] p-6 shadow-xl flex flex-col gap-4 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-900\/5 rounded-full blur-3xl pointer-events-none"></div>
           
-          <div class="flex items-center justify-between z-10">
+          <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="p-1.5 bg-zinc-800 rounded-lg text-indigo-400 flex items-center justify-center">
                 <i data-lucide="image" class="w-4 h-4"></i>
               </span>
               <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400">Source Image Workspace</h2>
             </div>
-            <span id="image-status-badge" class="hidden text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span id="image-status-badge" class="hidden text-\[10px\] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-emerald-500\/10 text-emerald-400 border border-emerald-500\/20">
               Ready to crop
             </span>
           </div>
 
           <!-- Drag and Drop Zone -->
-          <div id="drop-zone" class="border border-dashed border-zinc-800 hover:border-indigo-500/50 bg-zinc-900/20 hover:bg-zinc-900/40 rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[380px] flex-grow">
+          <div id="drop-zone" class="border border-dashed border-zinc-800 hover:border-indigo-500\/50 bg-zinc-900\/20 rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-\[380px\] flex-grow">
             <input type="file" id="file-input" class="hidden" accept="image/*" />
             <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow-inner mb-4 text-zinc-500">
               <i data-lucide="upload-cloud" class="w-10 h-10 text-indigo-500"></i>
             </div>
             <p class="font-semibold text-zinc-200 text-base mb-1">Drag and drop your image here</p>
             <p class="text-zinc-500 text-xs mb-6 tracking-wide">Supports PNG, JPG, JPEG, WEBP</p>
-            <button type="button" id="browse-btn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-indigo-900/20 transition-all active:scale-95">
+            <button type="button" id="browse-btn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg transition-all active:scale-95">
               Browse Files
             </button>
           </div>
 
           <!-- Cropper Workspace Container (Hidden until image is loaded) -->
-          <div id="cropper-workspace" class="hidden flex flex-col gap-4 flex-grow z-10">
-            <div class="cropper-container-wrapper rounded-2xl overflow-hidden relative border border-zinc-800 flex items-center justify-center min-h-[350px] max-h-[480px]">
-              <img id="cropper-image" src="" alt="Source Image for cropping" class="max-w-full max-h-[480px]" />
+          <div id="cropper-workspace" class="hidden flex flex-col gap-4 flex-grow">
+            <div class="cropper-container-wrapper rounded-2xl overflow-hidden relative border border-zinc-800 flex items-center justify-center min-h-\[350px\] max-h-\[480px\]">
+              <img id="cropper-image" src="" alt="Source Image for cropping" class="max-w-full max-h-\[480px\]" />
             </div>
 
             <!-- Aspect Ratio Preset Controls -->
-            <div class="flex flex-col gap-2 bg-zinc-900/80 p-4 rounded-2xl border border-zinc-800/60">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Aspect Ratio Selector</span>
+            <div class="flex flex-col gap-2 bg-zinc-900\/80 p-4 rounded-2xl border border-zinc-800\/60">
+              <span class="text-\[10px\] font-bold uppercase tracking-widest text-zinc-500">Aspect Ratio Selector</span>
               <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-                <button type="button" data-aspect-ratio="NaN" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                <button type="button" data-aspect-ratio="NaN" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
                   Free Form
                 </button>
-                <button type="button" data-aspect-ratio="1" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                <button type="button" data-aspect-ratio="1" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
                   1:1 Sq
                 </button>
-                <button type="button" data-aspect-ratio="1.3333" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                <button type="button" data-aspect-ratio="1.3333" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
                   4:3 Photo
                 </button>
-                <button type="button" data-aspect-ratio="1.7777" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                <button type="button" data-aspect-ratio="1.7777" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
                   16:9 Cinematic
                 </button>
-                <button type="button" data-aspect-ratio="0.5625" class="ratio-btn px-3 py-2 bg-zinc-800 hover:bg-zinc-700/80 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                <button type="button" data-aspect-ratio="0.5625" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
                   9:16 Portrait
                 </button>
               </div>
@@ -149,28 +420,28 @@
 
             <!-- Fine-Tuning Controls toolbar -->
             <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-              <div class="flex items-center gap-1.5 bg-zinc-900/60 p-1 rounded-xl border border-zinc-800/60">
+              <div class="flex items-center gap-1.5 bg-zinc-900\/60 p-1 rounded-xl border border-zinc-800\/60">
                 <button type="button" id="rotate-left" title="Rotate Left 90°" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
                   <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                 </button>
                 <button type="button" id="rotate-right" title="Rotate Right 90°" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
                   <i data-lucide="rotate-cw" class="w-4 h-4"></i>
                 </button>
-                <div class="h-5 w-[1px] bg-zinc-800 mx-1"></div>
+                <div class="h-5 w-\[1px\] bg-zinc-800 mx-1"></div>
                 <button type="button" id="flip-h" title="Flip Horizontal" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
                   <i data-lucide="flip-horizontal" class="w-4 h-4"></i>
                 </button>
                 <button type="button" id="flip-v" title="Flip Vertical" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
                   <i data-lucide="flip-vertical" class="w-4 h-4"></i>
                 </button>
-                <div class="h-5 w-[1px] bg-zinc-800 mx-1"></div>
+                <div class="h-5 w-\[1px\] bg-zinc-800 mx-1"></div>
                 <button type="button" id="reset-crop" title="Reset Image to Default" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 rounded-lg transition-colors">
                   <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                 </button>
               </div>
 
               <div>
-                <button type="button" id="change-image-btn" class="px-4 py-2.5 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700/60 transition-all">
+                <button type="button" id="change-image-btn" class="px-4 py-2.5 bg-zinc-800\/80 hover:bg-zinc-700\/80 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700\/60 transition-all">
                   Swap Image
                 </button>
               </div>
@@ -182,8 +453,8 @@
         <div class="lg:col-span-5 flex flex-col gap-6">
           
           <!-- Generator Parameters Panel -->
-          <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-[2rem] p-6 shadow-xl flex flex-col gap-4 relative overflow-hidden">
-            <div class="flex items-center gap-2 z-10">
+          <div class="bg-zinc-900\/50 border border-zinc-800\/80 rounded-\[2rem\] p-6 shadow-xl flex flex-col gap-4 relative overflow-hidden">
+            <div class="flex items-center gap-2">
               <span class="p-1.5 bg-zinc-800 rounded-lg text-indigo-400 flex items-center justify-center">
                 <i data-lucide="sliders" class="w-4 h-4"></i>
               </span>
@@ -191,8 +462,8 @@
             </div>
 
             <!-- Prompt Style Selection -->
-            <div class="flex flex-col gap-2 z-10">
-              <label for="prompt-style" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Output Style Tuning</label>
+            <div class="flex flex-col gap-2">
+              <label for="prompt-style" class="text-\[10px\] font-bold uppercase tracking-widest text-zinc-500">Output Style Tuning</label>
               <select id="prompt-style" class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl px-4 py-3.5 text-sm text-zinc-200 outline-none cursor-pointer transition-colors">
                 <option value="descriptive">Detailed Description (Standard Analysis)</option>
                 <option value="recreation">Perfect AI Recreation (Midjourney/DALL-E Prompt)</option>
@@ -202,33 +473,33 @@
             </div>
 
             <!-- Prompt Modifiers presets -->
-            <div class="flex flex-col gap-2.5 z-10">
+            <div class="flex flex-col gap-2.5">
               <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Quick Style Modifiers</span>
-                <button type="button" id="clear-modifiers-btn" class="text-[9px] uppercase tracking-widest text-zinc-500 hover:text-zinc-300 font-bold">Clear All</button>
+                <span class="text-\[10px\] font-bold uppercase tracking-widest text-zinc-500">Quick Style Modifiers</span>
+                <button type="button" id="clear-modifiers-btn" class="text-[9px] uppercase tracking-widest text-zinc-500 hover:text-zinc-300 font-bold bg-transparent border-0 cursor-pointer">Clear All</button>
               </div>
-              <div class="flex flex-wrap gap-1.5 max-h-[140px] overflow-y-auto custom-scrollbar pr-1">
+              <div class="flex flex-wrap gap-1.5 max-h-\[140px\] overflow-y-auto custom-scrollbar pr-1">
                 <!-- Lighting Presets -->
-                <button type="button" data-modifier="dramatic golden hour lighting" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🌅 Golden Hour</button>
-                <button type="button" data-modifier="neon cyberpunk synthwave lighting" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🌌 Cyberpunk Neon</button>
-                <button type="button" data-modifier="moody cinematic volumetric fog and film grain" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🎬 Cinematic Moody</button>
-                <button type="button" data-modifier="soft studio portrait lighting with bokeh background" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">📸 Studio Bokeh</button>
+                <button type="button" data-modifier="dramatic golden hour lighting" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🌅 Golden Hour</button>
+                <button type="button" data-modifier="neon cyberpunk synthwave lighting" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🌌 Cyberpunk Neon</button>
+                <button type="button" data-modifier="moody cinematic volumetric fog and film grain" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🎬 Cinematic Moody</button>
+                <button type="button" data-modifier="soft studio portrait lighting with bokeh background" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">📸 Studio Bokeh</button>
                 <!-- Style presets -->
-                <button type="button" data-modifier="ultra-detailed oil painting masterpiece art style" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🖌️ Oil Painting</button>
-                <button type="button" data-modifier="clean minimalist line-art aesthetic" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">✏️ Line-Art</button>
-                <button type="button" data-modifier="vibrant watercolor and ink wash illustration style" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">🎨 Watercolor Ink</button>
-                <button type="button" data-modifier="photorealistic 8k octane render hyper-detailed texture" class="modifier-btn px-2.5 py-1.5 bg-zinc-800/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950/20 hover:text-indigo-400 hover:border-indigo-900/50 rounded-lg text-xs font-medium">⚡ Hyper-Real</button>
+                <button type="button" data-modifier="ultra-detailed oil painting masterpiece art style" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🖌️ Oil Painting</button>
+                <button type="button" data-modifier="clean minimalist line-art aesthetic" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">✏️ Line-Art</button>
+                <button type="button" data-modifier="vibrant watercolor and ink wash illustration style" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🎨 Watercolor Ink</button>
+                <button type="button" data-modifier="photorealistic 8k octane render hyper-detailed texture" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">⚡ Hyper-Real</button>
               </div>
             </div>
 
             <!-- Custom Instructions input field -->
-            <div class="flex flex-col gap-2 z-10">
-              <label for="custom-instructions" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Custom Instructions (Optional)</label>
+            <div class="flex flex-col gap-2">
+              <label for="custom-instructions" class="text-\[10px\] font-bold uppercase tracking-widest text-zinc-500">Custom Instructions (Optional)</label>
               <textarea id="custom-instructions" rows="3" placeholder="Specify Leica camera configurations, focus textures, hyperreal settings, etc..." class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-zinc-200 outline-none resize-none placeholder-zinc-700 transition-colors"></textarea>
             </div>
 
             <!-- Generate Button -->
-            <button type="button" id="generate-btn" disabled class="w-full py-4 bg-zinc-800/40 text-zinc-700 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 border border-zinc-800/60 transition-all duration-200">
+            <button type="button" id="generate-btn" disabled class="w-full py-4 bg-zinc-800\/40 text-zinc-700 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 border border-zinc-800\/60 transition-all duration-200 cursor-pointer">
               <i data-lucide="sparkles" class="w-4 h-4"></i>
               <span>Generate Prompt</span>
             </button>
@@ -238,12 +509,12 @@
       </div>
 
       <!-- Bento Card 3: High Contrast Full-Width Generated Output Block -->
-      <div id="output-container" class="bg-zinc-900/50 border border-zinc-800/80 text-zinc-100 rounded-[2.5rem] p-6 sm:p-8 flex flex-col gap-6 shadow-xl relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-indigo-950/10 via-transparent to-transparent pointer-events-none"></div>
+      <div id="output-container" class="bg-zinc-900\/50 border border-zinc-800\/80 text-zinc-100 rounded-\[2.5rem\] p-6 sm:p-8 flex flex-col gap-6 shadow-xl relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-indigo-950\/10 to-transparent pointer-events-none"></div>
         
-        <div class="flex items-center justify-between z-10">
+        <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <h3 class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Generated Output</h3>
+            <h3 class="text-\[10px\] font-black uppercase text-zinc-400 tracking-widest">Generated Output</h3>
             <div id="output-state-badge" class="px-2 py-0.5 bg-zinc-800 border border-zinc-700 text-zinc-400 text-[9px] font-bold uppercase tracking-wider rounded-full">
               Waiting for Input
             </div>
@@ -256,7 +527,7 @@
           </div>
         </div>
 
-        <div class="relative min-h-[140px] flex flex-col z-10">
+        <div class="relative min-h-\[140px\] flex flex-col">
           
           <!-- Empty State visual -->
           <div id="output-empty" class="absolute inset-0 flex flex-col items-center justify-center text-center py-8">
@@ -273,9 +544,9 @@
               <span class="inline-block w-4 h-4 rounded-full bg-indigo-500 animate-spin border-2 border-zinc-950 border-t-transparent"></span>
               <p class="text-zinc-400 text-xs font-bold tracking-wide uppercase animate-pulse">Gemini analyzing lighting, textures & style elements...</p>
             </div>
-            <div class="h-4 bg-zinc-800/60 rounded-md w-full animate-pulse"></div>
-            <div class="h-4 bg-zinc-800/60 rounded-md w-[94%] animate-pulse"></div>
-            <div class="h-4 bg-zinc-800/60 rounded-md w-[80%] animate-pulse"></div>
+            <div class="h-4 bg-zinc-800\/60 rounded-md w-full animate-pulse"></div>
+            <div class="h-4 bg-zinc-800\/60 rounded-md w-\[94%\] animate-pulse"></div>
+            <div class="h-4 bg-zinc-800\/60 rounded-md w-\[80%\] animate-pulse"></div>
           </div>
 
           <!-- Real Generated Prompt Display -->
@@ -285,11 +556,11 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 shrink-0 w-full sm:w-auto">
-              <button type="button" id="copy-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-lg shadow-indigo-900/30 uppercase text-xs tracking-widest shrink-0">
+              <button type="button" id="copy-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-2xl flex items-center justify-center gap-3 hover:scale-\[1\.02\] transition-all shadow-lg uppercase text-xs tracking-widest shrink-0 cursor-pointer">
                 <i data-lucide="copy" class="w-4 h-4"></i>
                 <span>Copy Prompt</span>
               </button>
-              <button type="button" id="re-generate-btn" class="text-xs font-bold text-zinc-400 uppercase tracking-widest hover:text-white transition-colors bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700 py-4 px-5 rounded-2xl flex items-center justify-center" title="Re-generate prompt">
+              <button type="button" id="re-generate-btn" class="text-xs font-bold text-zinc-400 uppercase tracking-widest hover:text-white transition-colors bg-zinc-800\/80 hover:bg-zinc-700 border border-zinc-700 py-4 px-5 rounded-2xl flex items-center justify-center cursor-pointer" title="Re-generate prompt">
                 <i data-lucide="rotate-cw" class="w-4 h-4"></i>
               </button>
             </div>
@@ -301,15 +572,15 @@
     </main>
 
     <!-- Error Toast Notification -->
-    <div id="error-toast" class="fixed bottom-6 right-6 z-50 bg-rose-650 text-white border border-rose-800/50 px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md transform translate-y-24 opacity-0 pointer-events-none transition-all duration-350 bg-zinc-900">
-      <div class="bg-rose-900/30 border border-rose-700/50 p-2 rounded-xl text-rose-400">
+    <div id="error-toast" class="fixed bottom-6 right-6 z-50 text-white border border-rose-800\/50 px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md transform translate-y-24 opacity-0 pointer-events-none transition-all duration-350 bg-zinc-900">
+      <div class="bg-rose-900\/30 border border-rose-700\/50 p-2 rounded-xl text-rose-400">
         <i data-lucide="alert-circle" class="w-5 h-5"></i>
       </div>
       <div class="flex-grow">
         <p class="text-xs font-bold uppercase tracking-wider text-rose-400">System Error</p>
         <p id="error-message" class="text-xs text-zinc-400 mt-0.5">Could not process image</p>
       </div>
-      <button type="button" id="close-toast" class="text-zinc-500 hover:text-zinc-200 transition-colors">
+      <button type="button" id="close-toast" class="text-zinc-500 hover:text-zinc-200 transition-colors bg-transparent border-0 cursor-pointer">
         <i data-lucide="x" class="w-4 h-4"></i>
       </button>
     </div>
@@ -588,10 +859,10 @@
         if (originalImageBase64) {
           generateBtn.disabled = false;
           generateBtn.classList.remove('bg-zinc-800/40', 'text-zinc-700', 'cursor-not-allowed', 'border-zinc-800/60');
-          generateBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500', 'text-white', 'cursor-pointer', 'shadow-lg', 'shadow-indigo-900/30', 'border-indigo-500');
+          generateBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500', 'text-white', 'cursor-pointer', 'shadow-lg', 'border-indigo-500');
         } else {
           generateBtn.disabled = true;
-          generateBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500', 'text-white', 'shadow-lg', 'shadow-indigo-900/30', 'border-indigo-500');
+          generateBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500', 'text-white', 'shadow-lg', 'border-indigo-500');
           generateBtn.classList.add('bg-zinc-800/40', 'text-zinc-700', 'cursor-not-allowed', 'border-zinc-800/60');
         }
       }
@@ -602,7 +873,13 @@
         if (!textToCopy) return;
 
         try {
-          await navigator.clipboard.writeText(textToCopy);
+          // Strip quotes out for copying if they wrap it
+          let cleanCopyText = textToCopy;
+          if (cleanCopyText.startsWith('"') && cleanCopyText.endsWith('"')) {
+            cleanCopyText = cleanCopyText.slice(1, -1);
+          }
+
+          await navigator.clipboard.writeText(cleanCopyText);
           
           // Temporary Visual feedback on Copy
           const originalHTML = copyBtn.innerHTML;
@@ -644,18 +921,44 @@
             }).toDataURL('image/jpeg', 0.85);
           }
 
-          const response = await fetch('/api/generate-prompt', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              image: finalBase64Image,
-              mimeType: 'image/jpeg',
-              promptType: promptStyleSelect.value,
-              customInstructions: customInstructionsInput.value
-            })
-          });
+          let response;
+          try {
+            response = await fetch('/api/generate-prompt', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                image: finalBase64Image,
+                mimeType: 'image/jpeg',
+                promptType: promptStyleSelect.value,
+                customInstructions: customInstructionsInput.value
+              })
+            });
+
+            if (response.status === 404) {
+              console.warn("Relative API returned 404, attempting live Vercel fallback...");
+              throw new Error("API_404");
+            }
+          } catch (fetchErr) {
+            if (fetchErr.message === "API_404" || fetchErr instanceof TypeError) {
+              // Fallback to the live Vercel beta URL
+              response = await fetch('https://gemini-prompt-generator-beta.vercel.app/api/generate-prompt', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  image: finalBase64Image,
+                  mimeType: 'image/jpeg',
+                  promptType: promptStyleSelect.value,
+                  customInstructions: customInstructionsInput.value
+                })
+              });
+            } else {
+              throw fetchErr;
+            }
+          }
 
           if (!response.ok) {
             const errData = await response.json();
@@ -701,7 +1004,7 @@
         setLoadingState(false);
         outputLoading.classList.add('hidden');
         
-        // Set values and configure stats
+        // Set values and configure stats (with clean layout quotes for visuals)
         generatedPromptText.textContent = `"${promptText.trim()}"`;
         
         // Count chars and words
