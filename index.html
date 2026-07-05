@@ -1194,8 +1194,8 @@
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <!-- Firebase Compat SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
       // Initialize vector icons
@@ -1702,7 +1702,13 @@
       // --- Firebase Auth & Initialization ---
       async function initFirebase() {
         try {
+          if (typeof firebase === 'undefined') {
+            throw new Error("Firebase SDK script failed to load (possibly blocked by a browser shield or adblocker). Please disable Shields/Adblockers for this domain and refresh.");
+          }
           const res = await fetch('/api/firebase-config');
+          if (!res.ok) {
+            throw new Error(`Failed to fetch Firebase config (HTTP status ${res.status}).`);
+          }
           const config = await res.json();
           if (config && config.apiKey) {
             const app = firebase.initializeApp(config);
@@ -1721,10 +1727,12 @@
               }
             });
           } else {
-            console.warn("Firebase config not available or missing apiKey.");
+            throw new Error("Loaded Firebase configuration is missing or invalid.");
           }
         } catch (err) {
           console.error("Firebase initialization failed:", err);
+          authErrorMsg.textContent = err.message || "Firebase initialization failed.";
+          authErrorMsg.classList.remove('hidden');
         }
       }
 
