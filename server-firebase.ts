@@ -9,9 +9,25 @@ let projectId = process.env.FIREBASE_PROJECT_ID;
 let databaseId = process.env.FIREBASE_FIRESTORE_DATABASE_ID;
 
 try {
-  const configPath = path.join(process.cwd(), "firebase-applet-config.json");
-  if (fs.existsSync(configPath)) {
-    const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  const possiblePaths = [
+    path.join(process.cwd(), "firebase-applet-config.json"),
+    path.join(__dirname, "../firebase-applet-config.json"),
+    path.join(__dirname, "firebase-applet-config.json")
+  ];
+
+  let config: any = null;
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      try {
+        config = JSON.parse(fs.readFileSync(p, "utf8"));
+        break;
+      } catch (e) {
+        console.warn(`Failed to parse config at ${p}:`, e);
+      }
+    }
+  }
+
+  if (config) {
     if (!projectId) projectId = config.projectId;
     if (!databaseId) databaseId = config.firestoreDatabaseId;
   }
