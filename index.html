@@ -1193,6 +1193,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <script>
       // Initialize vector icons
@@ -1202,6 +1205,9 @@
       let originalImageBase64 = null;
       let originalMimeType = null;
       let selectedModifiers = new Set();
+
+      // Firebase client global instance
+      let auth = null;
 
       // User & Navigation State
       let currentUser = null;
@@ -1693,6 +1699,35 @@
         }
       }
 
+      // --- Firebase Auth & Initialization ---
+      async function initFirebase() {
+        try {
+          const res = await fetch('/api/firebase-config');
+          const config = await res.json();
+          if (config && config.apiKey) {
+            const app = firebase.initializeApp(config);
+            auth = firebase.auth();
+            
+            // Listen to firebase auth state changes
+            auth.onAuthStateChanged(async (user) => {
+              if (user) {
+                const idToken = await user.getIdToken();
+                setSessionToken(idToken);
+                await checkAuthMe();
+              } else {
+                setSessionToken(null);
+                currentUser = null;
+                updateUserUI();
+              }
+            });
+          } else {
+            console.warn("Firebase config not available or missing apiKey.");
+          }
+        } catch (err) {
+          console.error("Firebase initialization failed:", err);
+        }
+      }
+
       // --- Auth Forms Submission Handlers ---
       async function handleAuthSubmit(event) {
         event.preventDefault();
@@ -1702,37 +1737,42 @@
         const password = authInputPassword.value;
         const username = authInputUsername.value.trim();
         
-        const payload = currentAuthTab === 'signup' 
-          ? { username, email, password }
-          : { email, password };
-          
-        const endpoint = currentAuthTab === 'signup' 
-          ? '/api/auth/signup' 
-          : '/api/auth/login';
-          
+        if (!auth) {
+          authErrorMsg.textContent = "Firebase is not initialized yet. Please wait a moment and try again.";
+          authErrorMsg.classList.remove('hidden');
+          return;
+        }
+
         try {
           authSubmitBtn.disabled = true;
           authSubmitBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Processing...`;
           
-          const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          
-          const data = await res.json();
-          if (!res.ok) {
-            throw new Error(data.error || 'Authentication failed');
+          if (currentAuthTab === 'signup') {
+            // Sign up in Firebase Auth
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            if (userCredential.user) {
+              await userCredential.user.updateProfile({
+                displayName: username
+              });
+              const idToken = await userCredential.user.getIdToken();
+              setSessionToken(idToken);
+              await checkAuthMe();
+              closeAuthModal();
+              showToast('Authentication Successful', `Welcome, ${username}!`);
+              showView('generator');
+            }
+          } else {
+            // Sign in in Firebase Auth
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            if (userCredential.user) {
+              const idToken = await userCredential.user.getIdToken();
+              setSessionToken(idToken);
+              await checkAuthMe();
+              closeAuthModal();
+              showToast('Authentication Successful', `Welcome back, ${userCredential.user.displayName || 'User'}!`);
+              showView('generator');
+            }
           }
-          
-          setSessionToken(data.token);
-          currentUser = data.user;
-          updateUserUI();
-          closeAuthModal();
-          showToast('Authentication Successful', `Welcome back, ${currentUser.username || 'User'}!`);
-          
-          // Redirect to generator if they just logged in
-          showView('generator');
           
         } catch (err) {
           authErrorMsg.textContent = err.message;
@@ -1745,15 +1785,11 @@
 
       // --- Log Out Handler ---
       async function handleLogout() {
-        const token = getSessionToken();
-        if (token) {
+        if (auth) {
           try {
-            await fetch('/api/auth/logout', {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
+            await auth.signOut();
           } catch(err) {
-            console.error("Logout request failed:", err);
+            console.error("Firebase logout failed:", err);
           }
         }
         setSessionToken(null);
@@ -1779,6 +1815,10 @@
             const data = await res.json();
             currentUser = data.user;
           } else {
+            // Token is invalid/expired
+            if (auth) {
+              await auth.signOut();
+            }
             setSessionToken(null);
             currentUser = null;
           }
@@ -2127,8 +2167,8 @@
       window.toggleTheme = toggleTheme;
       window.toggleMobileMenu = toggleMobileMenu;
 
-      // Run profile loader on page start
-      checkAuthMe();
+      // Run profile loader and Firebase initialization on page start
+      initFirebase();
     </script>
   </body>
 </html>

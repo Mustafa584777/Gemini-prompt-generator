@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { getAuthenticatedUser, firestoreDb } from "../server-firebase";
 
 export default async function handler(req: any, res: any) {
   // Add CORS headers
@@ -18,6 +19,26 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    // 1. Authenticate user if they provided an ID Token
+    const authUser = await getAuthenticatedUser(req);
+    let userEmail = authUser ? authUser.email : null;
+    
+    if (userEmail) {
+      // Fetch user profile from Firestore
+      let profile = await firestoreDb.getUser(userEmail);
+      if (!profile) {
+        // Auto-create profile if user is authenticated in Auth but doesn't exist in Firestore
+        profile = await firestoreDb.createUser(userEmail, authUser.name || userEmail.split('@')[0], 90);
+      }
+      
+      if (profile.credits < 30) {
+        return res.status(403).json({
+          error: "credits_exhausted",
+          message: "You have used all your free uses. Please upgrade starting from $5 to get 50 credits."
+        });
+      }
+    }
+
     // Defensive body parsing
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { image, mimeType, promptType, customInstructions } = body || {};
@@ -78,7 +99,23 @@ export default async function handler(req: any, res: any) {
     });
 
     const generatedPrompt = response.text || "Could not generate a prompt.";
-    return res.status(200).json({ prompt: generatedPrompt });
+
+    // 2. If authenticated, deduct 30 credits and record in prompt history
+    let remainingCredits = null;
+    if (userEmail) {
+      const success = await firestoreDb.deductCredit(userEmail, 30);
+      if (success) {
+        const updatedUser = await firestoreDb.addPromptToHistory(userEmail, promptType, customInstructions, generatedPrompt);
+        if (updatedUser) {
+          remainingCredits = updatedUser.credits;
+        }
+      }
+    }
+
+    return res.status(200).json({
+      prompt: generatedPrompt,
+      ...(remainingCredits !== null ? { credits: remainingCredits } : {})
+    });
   } catch (error: any) {
     console.error("Gemini API Error in Vercel Function:", error);
     return res.status(500).json({ error: error.message || "An unexpected error occurred." });

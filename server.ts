@@ -1,9 +1,10 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { db } from "./server-db";
+import { getAuthenticatedUser as verifyFirebaseToken, firestoreDb } from "./server-firebase";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
@@ -27,112 +28,76 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-// Helper to authenticate user from headers
-function getAuthenticatedUser(req: express.Request) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+// Helper to authenticate user and auto-create Firestore profile if they are new
+async function getAuthenticatedUser(req: any) {
+  const authUser = await verifyFirebaseToken(req);
+  if (!authUser || !authUser.email) {
     return null;
   }
-  const token = authHeader.substring(7);
-  return { user: db.getUserByToken(token), token };
+  const email = authUser.email;
+  let profile = await firestoreDb.getUser(email);
+  if (!profile) {
+    profile = await firestoreDb.createUser(email, authUser.name || email.split('@')[0], 90);
+  }
+  return profile;
 }
 
-// Auth API - Sign Up
-app.post("/api/auth/signup", (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    const existingUser = db.getUserByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ error: "Email is already registered" });
-    }
-
-    // Simple hash representation for plaintext passwords
-    const passwordHash = Buffer.from(password).toString("base64");
-    const user = db.createUser(username, email, passwordHash);
-    const token = db.generateToken(email);
-
-    res.json({
-      success: true,
-      token,
-      user: {
-        username: user.username,
-        email: user.email,
-        credits: user.credits,
-        promptHistory: user.promptHistory
-      }
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || "Signup failed" });
-  }
-});
-
-// Auth API - Log In
-app.post("/api/auth/login", (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: "Missing email or password" });
-    }
-
-    const user = db.getUserByEmail(email);
-    const passwordHash = Buffer.from(password).toString("base64");
-
-    if (!user || user.passwordHash !== passwordHash) {
-      return res.status(401).json({ error: "Invalid email or password" });
-    }
-
-    const token = db.generateToken(email);
-
-    res.json({
-      success: true,
-      token,
-      user: {
-        username: user.username,
-        email: user.email,
-        credits: user.credits,
-        promptHistory: user.promptHistory
-      }
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || "Login failed" });
-  }
-});
-
 // Auth API - Get Current Profile (Me)
-app.get("/api/auth/me", (req, res) => {
+app.get("/api/auth/me", async (req, res) => {
   try {
-    const auth = getAuthenticatedUser(req);
-    if (!auth || !auth.user) {
-      return res.status(401).json({ error: "Unauthorized" });
+    const profile = await getAuthenticatedUser(req);
+    if (!profile) {
+      return res.status(401).json({ error: "Unauthorized", message: "Invalid or expired session token." });
     }
     res.json({
       success: true,
       user: {
-        username: auth.user.username,
-        email: auth.user.email,
-        credits: auth.user.credits,
-        promptHistory: auth.user.promptHistory
+        username: profile.username,
+        email: profile.email,
+        credits: profile.credits,
+        promptHistory: profile.promptHistory || []
       }
     });
   } catch (error: any) {
+    console.error("Auth Me check failed in Express:", error);
     res.status(500).json({ error: "Failed to get profile" });
   }
 });
 
-// Auth API - Log Out
+// Auth API - Log Out placeholder
 app.post("/api/auth/logout", (req, res) => {
+  res.json({ success: true });
+});
+
+// Firebase Config API - Expose public configuration keys safely
+app.get("/api/firebase-config", (req, res) => {
   try {
-    const auth = getAuthenticatedUser(req);
-    if (auth && auth.token) {
-      db.logoutToken(auth.token);
+    let config: any = {
+      apiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.FIREBASE_APP_ID,
+      firestoreDatabaseId: process.env.FIREBASE_FIRESTORE_DATABASE_ID
+    };
+
+    const configPath = path.join(process.cwd(), "firebase-applet-config.json");
+    if (fs.existsSync(configPath)) {
+      const fileConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
+      config.apiKey = config.apiKey || fileConfig.apiKey;
+      config.authDomain = config.authDomain || fileConfig.authDomain;
+      config.projectId = config.projectId || fileConfig.projectId;
+      config.storageBucket = config.storageBucket || fileConfig.storageBucket;
+      config.messagingSenderId = config.messagingSenderId || fileConfig.messagingSenderId;
+      config.appId = config.appId || fileConfig.appId;
+      config.firestoreDatabaseId = config.firestoreDatabaseId || fileConfig.firestoreDatabaseId;
     }
-    res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: "Logout failed" });
+
+    res.json(config);
+  } catch (err: any) {
+    console.error("Error fetching firebase config in Express:", err);
+    res.status(500).json({ error: "Failed to load firebase config" });
   }
 });
 
@@ -152,8 +117,8 @@ app.get("/api/payment/razorpay-config", (req, res) => {
 // Razorpay API - Create Payment Order
 app.post("/api/payment/create-order", async (req, res) => {
   try {
-    const auth = getAuthenticatedUser(req);
-    if (!auth || !auth.user) {
+    const profile = await getAuthenticatedUser(req);
+    if (!profile) {
       return res.status(401).json({ error: "Unauthorized. Please log in first." });
     }
 
@@ -212,8 +177,8 @@ app.post("/api/payment/create-order", async (req, res) => {
 // Razorpay API - Verify Payment Signature & Credit User
 app.post("/api/payment/verify", async (req, res) => {
   try {
-    const auth = getAuthenticatedUser(req);
-    if (!auth || !auth.user) {
+    const profile = await getAuthenticatedUser(req);
+    if (!profile) {
       return res.status(401).json({ error: "Unauthorized. Please log in first." });
     }
 
@@ -240,8 +205,8 @@ app.post("/api/payment/verify", async (req, res) => {
       return res.status(400).json({ error: "Payment verification failed. Invalid signature." });
     }
 
-    // Credit user's account
-    const updatedUser = db.addCredits(auth.user.email, Number(credits));
+    // Credit user's account in Firestore
+    const updatedUser = await firestoreDb.addCredits(profile.email, Number(credits));
     if (!updatedUser) {
       return res.status(404).json({ error: "User profile not found." });
     }
@@ -250,7 +215,7 @@ app.post("/api/payment/verify", async (req, res) => {
       success: true,
       credits: updatedUser.credits,
       added: Number(credits),
-      promptHistory: updatedUser.promptHistory
+      promptHistory: updatedUser.promptHistory || []
     });
 
   } catch (error: any) {
@@ -260,10 +225,10 @@ app.post("/api/payment/verify", async (req, res) => {
 });
 
 // User API - Add Credits (Checkout Sim)
-app.post("/api/user/add-credits", (req, res) => {
+app.post("/api/user/add-credits", async (req, res) => {
   try {
-    const auth = getAuthenticatedUser(req);
-    if (!auth || !auth.user) {
+    const profile = await getAuthenticatedUser(req);
+    if (!profile) {
       return res.status(401).json({ error: "Unauthorized. Please log in first." });
     }
 
@@ -274,7 +239,7 @@ app.post("/api/user/add-credits", (req, res) => {
 
     // Give 50 credits on $5, and proportional credits for larger amounts
     const creditsToAdd = Math.floor((Number(amount) / 5) * 50);
-    const updatedUser = db.addCredits(auth.user.email, creditsToAdd);
+    const updatedUser = await firestoreDb.addCredits(profile.email, creditsToAdd);
 
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
@@ -284,7 +249,7 @@ app.post("/api/user/add-credits", (req, res) => {
       success: true,
       credits: updatedUser.credits,
       added: creditsToAdd,
-      promptHistory: updatedUser.promptHistory
+      promptHistory: updatedUser.promptHistory || []
     });
   } catch (error: any) {
     res.status(500).json({ error: "Payment checkout simulation failed" });
@@ -312,21 +277,17 @@ app.post("/api/generate-prompt", async (req, res) => {
     }
 
     // Check Authentication
-    const auth = getAuthenticatedUser(req);
-    let userEmail = "";
+    const profile = await getAuthenticatedUser(req);
+    let userEmail = profile ? profile.email : null;
     
-    if (auth && auth.user) {
-      userEmail = auth.user.email;
+    if (userEmail && profile) {
       // Enforce credits check
-      if (auth.user.credits < 30) {
+      if (profile.credits < 30) {
         return res.status(403).json({
           error: "credits_exhausted",
           message: "You have used all your free uses. Please upgrade starting from $5 to get 50 credits."
         });
       }
-    } else {
-      // Anonymous request - we can allow or suggest log in. Let's let client enforce,
-      // but if server wants to allow, we just process. Let's print warning or proceed.
     }
 
     // Clean base64 string
@@ -370,10 +331,12 @@ app.post("/api/generate-prompt", async (req, res) => {
     // If authenticated user, deduct 30 credits and record in prompt history
     let remainingCredits = null;
     if (userEmail) {
-      db.deductCredit(userEmail, 30);
-      const updatedUser = db.addPromptToHistory(userEmail, promptType, customInstructions, generatedPrompt);
-      if (updatedUser) {
-        remainingCredits = updatedUser.credits;
+      const success = await firestoreDb.deductCredit(userEmail, 30);
+      if (success) {
+        const updatedUser = await firestoreDb.addPromptToHistory(userEmail, promptType, customInstructions, generatedPrompt);
+        if (updatedUser) {
+          remainingCredits = updatedUser.credits;
+        }
       }
     }
 
