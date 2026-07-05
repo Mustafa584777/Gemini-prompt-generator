@@ -1208,6 +1208,19 @@
 
       // Firebase client global instance
       let auth = null;
+      let firebaseInitError = null;
+
+      // Helper to load scripts dynamically
+      async function loadScript(url) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = url;
+          script.async = true;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+          document.head.appendChild(script);
+        });
+      }
 
       // User & Navigation State
       let currentUser = null;
@@ -1702,14 +1715,58 @@
       // --- Firebase Auth & Initialization ---
       async function initFirebase() {
         try {
+          firebaseInitError = null;
+          
+          // Fallback loading mechanism if static script tag fails (e.g. Brave Shields / Content Blockers)
           if (typeof firebase === 'undefined') {
-            throw new Error("Firebase SDK script failed to load (possibly blocked by a browser shield or adblocker). Please disable Shields/Adblockers for this domain and refresh.");
+            console.log("Firebase is not loaded yet. Attempting dynamic script load with failover CDNs...");
+            const cdns = [
+              {
+                app: "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js",
+                auth: "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"
+              },
+              {
+                app: "https://cdn.jsdelivr.net/npm/firebase@10.8.0/firebase-app-compat.js",
+                auth: "https://cdn.jsdelivr.net/npm/firebase@10.8.0/firebase-auth-compat.js"
+              },
+              {
+                app: "https://unpkg.com/firebase@10.8.0/firebase-app-compat.js",
+                auth: "https://unpkg.com/firebase@10.8.0/firebase-auth-compat.js"
+              }
+            ];
+
+            let loaded = false;
+            for (const cdn of cdns) {
+              try {
+                await loadScript(cdn.app);
+                await loadScript(cdn.auth);
+                if (typeof firebase !== 'undefined') {
+                  loaded = true;
+                  console.log(`Successfully loaded Firebase from CDN: ${cdn.app}`);
+                  break;
+                }
+              } catch (e) {
+                console.warn(`Could not load Firebase from ${cdn.app}, trying next...`, e);
+              }
+            }
+
+            if (!loaded) {
+              throw new Error("Firebase SDK script failed to load from all CDNs. This is typically caused by an adblocker, Brave Shields, or content-blocking browser extensions. Please disable Shields/adblockers for this site and refresh.");
+            }
           }
+
           const res = await fetch('/api/firebase-config');
           if (!res.ok) {
             throw new Error(`Failed to fetch Firebase config (HTTP status ${res.status}).`);
           }
-          const config = await res.json();
+          
+          let config;
+          try {
+            config = await res.json();
+          } catch (jsonErr) {
+            throw new Error("Server returned an invalid configuration format. Please verify your backend server.");
+          }
+
           if (config && config.apiKey) {
             const app = firebase.initializeApp(config);
             auth = firebase.auth();
@@ -1731,7 +1788,8 @@
           }
         } catch (err) {
           console.error("Firebase initialization failed:", err);
-          authErrorMsg.textContent = err.message || "Firebase initialization failed.";
+          firebaseInitError = err.message || "Firebase initialization failed.";
+          authErrorMsg.textContent = firebaseInitError;
           authErrorMsg.classList.remove('hidden');
         }
       }
@@ -1746,7 +1804,11 @@
         const username = authInputUsername.value.trim();
         
         if (!auth) {
-          authErrorMsg.textContent = "Firebase is not initialized yet. Please wait a moment and try again.";
+          if (firebaseInitError) {
+            authErrorMsg.textContent = `Initialization Error: ${firebaseInitError}`;
+          } else {
+            authErrorMsg.textContent = "Firebase is still initializing. Please wait a moment and try again.";
+          }
           authErrorMsg.classList.remove('hidden');
           return;
         }

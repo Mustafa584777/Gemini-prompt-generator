@@ -94,6 +94,15 @@ app.get("/api/firebase-config", (req, res) => {
       config.firestoreDatabaseId = config.firestoreDatabaseId || fileConfig.firestoreDatabaseId;
     }
 
+    // Absolute robust default fallback values for this specific project
+    config.apiKey = config.apiKey || "AIzaSyCFyGzp7viV1tq25DAMnpKKSJpPngtVa14";
+    config.authDomain = config.authDomain || "gen-lang-client-0844549707.firebaseapp.com";
+    config.projectId = config.projectId || "gen-lang-client-0844549707";
+    config.storageBucket = config.storageBucket || "gen-lang-client-0844549707.firebasestorage.app";
+    config.messagingSenderId = config.messagingSenderId || "845800015860";
+    config.appId = config.appId || "1:845800015860:web:a6229be704605991785ba1";
+    config.firestoreDatabaseId = config.firestoreDatabaseId || "ai-studio-imagetogeminipro-7991f626-f4c5-4d1c-8e24-82965df261a7";
+
     res.json(config);
   } catch (err: any) {
     console.error("Error fetching firebase config in Express:", err);
