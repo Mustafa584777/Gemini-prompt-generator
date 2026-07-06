@@ -558,13 +558,29 @@
               closeAuthModal();
             }
             
-            alert("Login successful! Welcome " + (result.user.displayName || 'User'));
+            // Seamlessly display beautiful status notifications and route views
+            if (typeof showToast === 'function') {
+              showToast("Login successful!", "Welcome back, " + (result.user.displayName || result.user.email.split('@')[0]) + "!");
+            }
             
-            window.location.href = "/dashboard.html";
+            if (typeof showView === 'function') {
+              showView('dashboard');
+              try {
+                window.history.pushState({}, '', '/dashboard');
+              } catch (e) {
+                console.warn("History pushState blocked/failed:", e);
+              }
+            } else {
+              window.location.href = "/dashboard";
+            }
           })
           .catch((error) => {
             console.error("Login error:", error);
-            alert("Login failed: " + error.message);
+            if (typeof showToast === 'function') {
+              showToast("Login failed", error.message);
+            } else {
+              alert("Login failed: " + error.message);
+            }
           });
       }
     </script>
