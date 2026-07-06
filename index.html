@@ -1470,7 +1470,8 @@
           }
 
           try {
-            response = await fetch('/api/generate-prompt', {
+            const apiEndpoint = getApiUrl('/api/generate-prompt');
+            response = await fetch(apiEndpoint, {
               method: 'POST',
               headers: headers,
               body: JSON.stringify({
@@ -1481,7 +1482,7 @@
               })
             });
 
-            if (response.status === 404) {
+            if (response.status === 404 && apiEndpoint.startsWith('/api/')) {
               console.warn("Relative API returned 404, attempting live Vercel fallback...");
               throw new Error("API_404");
             }
@@ -1689,6 +1690,14 @@
         }
       }
 
+      // --- Helper to resolve API paths based on host environment ---
+      function getApiUrl(path) {
+        const host = window.location.hostname;
+        const isDev = host === 'localhost' || host === '127.0.0.1' || host.includes('run.app');
+        const apiBase = isDev ? '' : 'https://gemini-prompt-generator-beta.vercel.app';
+        return apiBase + path;
+      }
+
       // --- Firebase Auth & Initialization ---
       async function initFirebase() {
         try {
@@ -1732,37 +1741,32 @@
             }
           }
 
-          const res = await fetch('/api/firebase-config');
-          if (!res.ok) {
-            throw new Error(`Failed to fetch Firebase config (HTTP status ${res.status}).`);
-          }
-          
-          let config;
-          try {
-            config = await res.json();
-          } catch (jsonErr) {
-            throw new Error("Server returned an invalid configuration format. Please verify your backend server.");
-          }
+          // Use static configuration directly to support static HTML environments cleanly
+          const config = {
+            projectId: "gen-lang-client-0844549707",
+            appId: "1:845800015860:web:a6229be704605991785ba1",
+            apiKey: "AIzaSyCFyGzp7viV1tq25DAMnpKKSJpPngtVa14",
+            authDomain: "gen-lang-client-0844549707.firebaseapp.com",
+            firestoreDatabaseId: "ai-studio-imagetogeminipro-7991f626-f4c5-4d1c-8e24-82965df261a7",
+            storageBucket: "gen-lang-client-0844549707.firebasestorage.app",
+            messagingSenderId: "845800015860"
+          };
 
-          if (config && config.apiKey) {
-            const app = firebase.initializeApp(config);
-            auth = firebase.auth();
-            
-            // Listen to firebase auth state changes
-            auth.onAuthStateChanged(async (user) => {
-              if (user) {
-                const idToken = await user.getIdToken();
-                setSessionToken(idToken);
-                await checkAuthMe();
-              } else {
-                setSessionToken(null);
-                currentUser = null;
-                updateUserUI();
-              }
-            });
-          } else {
-            throw new Error("Loaded Firebase configuration is missing or invalid.");
-          }
+          const app = firebase.initializeApp(config);
+          auth = firebase.auth();
+          
+          // Listen to firebase auth state changes
+          auth.onAuthStateChanged(async (user) => {
+            if (user) {
+              const idToken = await user.getIdToken();
+              setSessionToken(idToken);
+              await checkAuthMe();
+            } else {
+              setSessionToken(null);
+              currentUser = null;
+              updateUserUI();
+            }
+          });
         } catch (err) {
           console.error("Firebase initialization failed:", err);
           firebaseInitError = err.message || "Firebase initialization failed.";
@@ -1785,7 +1789,7 @@
           authSubmitBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Processing...`;
           
           if (currentAuthTab === 'signup') {
-            const res = await fetch('/api/auth/custom-signup', {
+            const res = await fetch(getApiUrl('/api/auth/custom-signup'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ username, email, password })
@@ -1800,7 +1804,7 @@
             showToast('Authentication Successful', `Welcome, ${username}!`);
             showView('generator');
           } else {
-            const res = await fetch('/api/auth/custom-login', {
+            const res = await fetch(getApiUrl('/api/auth/custom-login'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email, password })
@@ -1828,146 +1832,41 @@
       // --- Google Sign-In Handler ---
       async function handleGoogleSignIn() {
         authErrorMsg.classList.add('hidden');
-        let signedInViaPopup = false;
-
-        // Try standard Firebase Sign-In first
-        if (auth && !firebaseInitError) {
-          try {
-            authSubmitBtn.disabled = true;
-            authSubmitBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Connecting...`;
-            
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({
-              prompt: 'select_account'
-            });
-            
-            const userCredential = await auth.signInWithPopup(provider);
-            if (userCredential.user) {
-              const idToken = await userCredential.user.getIdToken();
-              setSessionToken(idToken);
-              await checkAuthMe();
-              closeAuthModal();
-              showToast('Authentication Successful', `Welcome, ${userCredential.user.displayName || 'User'}!`);
-              showView('generator');
-              signedInViaPopup = true;
-              return;
-            }
-          } catch (err) {
-            console.warn("Firebase popup Sign-In was blocked or failed, initiating direct secure fallback:", err);
-          } finally {
-            if (!signedInViaPopup) {
-              authSubmitBtn.disabled = false;
-              authSubmitBtn.textContent = currentAuthTab === 'signup' ? 'Create Account' : 'Log In';
-            }
-          }
-        }
-
-        // --- Iframe & Adblocker Fallback ---
-        // If standard popup fails/is blocked, prompt the user for their Google email address
-        const email = prompt("To bypass browser iframe/popup block restrictions, please enter your Google account email address to authenticate instantly:", "user@gmail.com");
-        if (!email) {
-          return;
-        }
-
-        const cleanEmail = email.trim();
-        if (!cleanEmail.includes('@')) {
-          showToast('Invalid Email', 'Please provide a valid email address.');
+        if (!auth || firebaseInitError) {
+          showToast('Initialization Error', 'Firebase has not finished initializing or is blocked. Please refresh.');
           return;
         }
 
         try {
           authSubmitBtn.disabled = true;
           authSubmitBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Connecting...`;
-
-          const username = cleanEmail.split('@')[0];
-          // Try custom registration first
-          const res = await fetch('/api/auth/custom-signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email: cleanEmail, password: "GoogleFallbackUserSecretSecurePassword123!" })
+          
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({
+            prompt: 'select_account'
           });
           
-          let data = await res.json();
-          if (!res.ok) {
-            // Already exists, do login instead
-            const loginRes = await fetch('/api/auth/custom-login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: cleanEmail, password: "GoogleFallbackUserSecretSecurePassword123!" })
-            });
-            data = await loginRes.json();
-            if (!loginRes.ok) {
-              throw new Error(data.error || "Google Sign-In simulation failed.");
-            }
+          const userCredential = await auth.signInWithPopup(provider);
+          if (userCredential.user) {
+            const idToken = await userCredential.user.getIdToken();
+            setSessionToken(idToken);
+            await checkAuthMe();
+            closeAuthModal();
+            showToast('Authentication Successful', `Welcome, ${userCredential.user.displayName || 'User'}!`);
+            showView('generator');
           }
-
-          setSessionToken(data.token);
-          await checkAuthMe();
-          closeAuthModal();
-          showToast('Authentication Successful', `Welcome back, ${data.user.username || 'User'}!`);
-          showView('generator');
-        } catch (fallbackErr) {
-          console.error("Direct fallback authentication failed:", fallbackErr);
-          authErrorMsg.textContent = fallbackErr.message || "Sign-In fallback failed. Please check your credentials.";
+        } catch (err) {
+          console.error("Firebase popup Sign-In failed:", err);
+          let userMessage = "Google Sign-In failed or was cancelled. If you see popup block alerts, please enable popups for this site.";
+          if (err.code === 'auth/popup-blocked') {
+            userMessage = "Google sign-in popup was blocked by your browser. Please allow popups for this domain and try again.";
+          }
+          authErrorMsg.textContent = userMessage;
           authErrorMsg.classList.remove('hidden');
+          showToast('Google Sign-In Failed', err.message || 'Popup was closed or blocked.');
         } finally {
           authSubmitBtn.disabled = false;
           authSubmitBtn.textContent = currentAuthTab === 'signup' ? 'Create Account' : 'Log In';
-        }
-      }
-
-      // --- Direct Google Email Fallback Handler ---
-      async function handleGoogleEmailFallback() {
-        authErrorMsg.classList.add('hidden');
-        const emailInput = document.getElementById('auth-fallback-email');
-        if (!emailInput) return;
-        
-        const email = emailInput.value.trim();
-        if (!email) {
-          showToast('Email Required', 'Please enter your Google account email address.');
-          return;
-        }
-
-        if (!email.includes('@')) {
-          showToast('Invalid Email', 'Please provide a valid email address.');
-          return;
-        }
-
-        try {
-          showToast('Connecting', 'Authenticating via direct email fallback...');
-          const username = email.split('@')[0];
-          
-          // Try custom registration first
-          const res = await fetch('/api/auth/custom-signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password: "GoogleFallbackUserSecretSecurePassword123!" })
-          });
-          
-          let data = await res.json();
-          if (!res.ok) {
-            // Already exists, do login instead
-            const loginRes = await fetch('/api/auth/custom-login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, password: "GoogleFallbackUserSecretSecurePassword123!" })
-            });
-            data = await loginRes.json();
-            if (!loginRes.ok) {
-              throw new Error(data.error || "Direct authentication fallback failed.");
-            }
-          }
-
-          setSessionToken(data.token);
-          await checkAuthMe();
-          closeAuthModal();
-          showToast('Authentication Successful', `Welcome back, ${data.user.username || 'User'}!`);
-          showView('generator');
-        } catch (err) {
-          console.error("Direct fallback authentication failed:", err);
-          authErrorMsg.textContent = err.message || "Direct Sign-In fallback failed. Please check your credentials.";
-          authErrorMsg.classList.remove('hidden');
-          showToast('Authentication Failed', err.message || "Please check your email.");
         }
       }
 
@@ -1996,7 +1895,7 @@
           return;
         }
         try {
-          const res = await fetch('/api/auth/me', {
+          const res = await fetch(getApiUrl('/api/auth/me'), {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (res.ok) {
@@ -2174,11 +2073,11 @@
           const token = getSessionToken();
           
           // 1. Fetch Razorpay configuration first to see if sandbox mode is active
-          const configRes = await fetch('/api/payment/razorpay-config');
+          const configRes = await fetch(getApiUrl('/api/payment/razorpay-config'));
           const configData = await configRes.json();
           
           // 2. Create the order on the backend
-          const orderRes = await fetch('/api/payment/create-order', {
+          const orderRes = await fetch(getApiUrl('/api/payment/create-order'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -2265,7 +2164,7 @@
         try {
           showToast('Verifying', 'Securing payment ledger...');
           
-          const verifyRes = await fetch('/api/payment/verify', {
+          const verifyRes = await fetch(getApiUrl('/api/payment/verify'), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -2312,7 +2211,6 @@
       window.switchAuthTab = switchAuthTab;
       window.handleAuthSubmit = handleAuthSubmit;
       window.handleLogout = handleLogout;
-      window.handleGoogleEmailFallback = handleGoogleEmailFallback;
 
       // --- Light Mode Switcher ---
       function toggleTheme() {
