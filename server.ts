@@ -4,7 +4,7 @@ import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { getAuthenticatedUser as verifyFirebaseToken, firestoreDb } from "./server-firebase";
+import { getAuthenticatedUser as verifyFirebaseToken, firestoreDb, generateToken } from "./server-firebase";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
@@ -61,6 +61,62 @@ app.get("/api/auth/me", async (req, res) => {
   } catch (error: any) {
     console.error("Auth Me check failed in Express:", error);
     res.status(500).json({ error: "Failed to get profile" });
+  }
+});
+
+// Auth API - Custom Native Signup (immune to Brave/Adblockers & iframe storage blocks)
+app.post("/api/auth/custom-signup", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: "Username, email, and password are required." });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long." });
+    }
+    
+    const existing = await firestoreDb.getUser(email);
+    if (existing) {
+      return res.status(400).json({ error: "Email address is already registered." });
+    }
+
+    const newUser = await firestoreDb.createUserWithPassword(email, username, password, 90);
+    const token = generateToken(email);
+
+    res.json({
+      success: true,
+      token,
+      user: newUser
+    });
+  } catch (error: any) {
+    console.error("Custom signup failed:", error);
+    res.status(500).json({ error: error.message || "Failed to register account." });
+  }
+});
+
+// Auth API - Custom Native Login (immune to Brave/Adblockers & iframe storage blocks)
+app.post("/api/auth/custom-login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required." });
+    }
+
+    const user = await firestoreDb.verifyUserPassword(email, password);
+    if (!user) {
+      return res.status(401).json({ error: "Invalid email address or password. Please check your credentials or register a new account." });
+    }
+
+    const token = generateToken(email);
+
+    res.json({
+      success: true,
+      token,
+      user
+    });
+  } catch (error: any) {
+    console.error("Custom login failed:", error);
+    res.status(500).json({ error: error.message || "Failed to log in." });
   }
 });
 
