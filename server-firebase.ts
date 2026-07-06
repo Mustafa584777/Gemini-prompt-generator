@@ -9,9 +9,7 @@ let apiKey = process.env.FIREBASE_API_KEY;
 
 try {
   const possiblePaths = [
-    path.join(process.cwd(), "firebase-applet-config.json"),
-    path.join(__dirname, "../firebase-applet-config.json"),
-    path.join(__dirname, "firebase-applet-config.json")
+    path.join(process.cwd(), "firebase-applet-config.json")
   ];
 
   let config: any = null;

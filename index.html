@@ -988,26 +988,7 @@
           <span>Continue with Google Account</span>
         </button>
 
-        <!-- Divider -->
-        <div class="flex items-center my-1">
-          <div class="flex-1 border-t border-zinc-800/80"></div>
-          <span class="px-3 text-[9px] text-zinc-500 font-bold uppercase tracking-widest whitespace-nowrap">Popup Blocked / Browser Shield?</span>
-          <div class="flex-1 border-t border-zinc-800/80"></div>
-        </div>
-
-        <!-- Direct Google Email Sign-In Fallback -->
-        <div class="flex flex-col gap-2">
-          <label for="auth-fallback-email" class="text-[9px] font-bold uppercase tracking-widest text-zinc-500">Google Email Instant Sign-In</label>
-          <div class="flex gap-2">
-            <input type="email" id="auth-fallback-email" placeholder="your.google.email@gmail.com" class="flex-1 px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors" />
-            <button type="button" onclick="handleGoogleEmailFallback()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer active:scale-95 whitespace-nowrap">
-              Sign In
-            </button>
-          </div>
-          <p class="text-[9px] text-zinc-500 italic">Enter your Google Email directly to sign in instantly if Google popups are blocked by your browser/adblocker/iframe.</p>
-        </div>
-
-        <button type="button" onclick="closeAuthModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer mt-1">
+        <button type="button" onclick="closeAuthModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer">
           Cancel
         </button>
 
