@@ -85,7 +85,7 @@ export async function getAuthenticatedUser(req: any): Promise<any | null> {
     console.log("server-firebase: getAuthenticatedUser: Authorization header is missing or does not start with Bearer");
     return null;
   }
-  const idToken = authHeader.substring(7);
+  const idToken = authHeader.substring(7).trim();
 
   // 1. Try our custom JWT verifier first (which bypasses Firebase completely and is fast)
   const customEmail = verifyToken(idToken);
@@ -98,13 +98,25 @@ export async function getAuthenticatedUser(req: any): Promise<any | null> {
   try {
     const parts = idToken.split(".");
     if (parts.length === 3) {
-      const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-      const payload = JSON.parse(Buffer.from(base64, "base64").toString("utf8"));
+      let decodedStr = "";
+      try {
+        decodedStr = Buffer.from(parts[1], "base64url").toString("utf8");
+      } catch (e) {
+        let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        while (base64.length % 4) {
+          base64 += "=";
+        }
+        decodedStr = Buffer.from(base64, "base64").toString("utf8");
+      }
+
+      const payload = JSON.parse(decodedStr);
       console.log("server-firebase: getAuthenticatedUser: decoded Firebase token payload", payload);
-      if (payload && payload.email) {
+      
+      const email = payload.email || (payload.firebase?.identities?.email ? payload.firebase.identities.email[0] : null);
+      if (email) {
         return {
-          email: payload.email,
-          name: payload.name || payload.email.split('@')[0],
+          email: email,
+          name: payload.name || email.split("@")[0],
           uid: payload.user_id || payload.sub,
         };
       } else {

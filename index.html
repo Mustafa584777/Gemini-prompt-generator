@@ -560,11 +560,7 @@
             
             alert("Login successful! Welcome " + (result.user.displayName || 'User'));
             
-            if (typeof showView === 'function') {
-              showView('dashboard');
-            } else {
-              window.location.href = "/dashboard.html";
-            }
+            window.location.href = "/dashboard.html";
           })
           .catch((error) => {
             console.error("Login error:", error);
