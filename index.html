@@ -811,7 +811,7 @@
           <p class="text-zinc-400 text-sm">Convert any visual artwork, real photography, or UI layout to high-fidelity AI prompt code instantly.</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto w-full mt-4 items-stretch">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto w-full mt-4 items-stretch">
           <!-- Starter Plan -->
           <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between gap-6 relative overflow-hidden shadow-lg">
             <div class="flex flex-col gap-4">
@@ -832,33 +832,6 @@
             </div>
             <button onclick="showView('generator')" class="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700 transition-all cursor-pointer">
               Use Guest Credits
-            </button>
-          </div>
-
-          <!-- Razorpay Test Pack (₹1 for 1 credit) -->
-          <div class="bg-zinc-900/40 border border-emerald-800/60 hover:border-emerald-500/50 rounded-2xl p-6 flex flex-col justify-between gap-6 relative overflow-hidden shadow-lg transition-all">
-            <div class="absolute top-4 right-4">
-              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider">Test Pack</span>
-            </div>
-            <div class="flex flex-col gap-4">
-              <div>
-                <h3 class="text-zinc-400 text-xs font-bold uppercase tracking-widest">Test Pack</h3>
-                <div class="flex items-baseline gap-1 mt-2">
-                  <span class="text-4xl font-extrabold text-white">₹1</span>
-                  <span class="text-zinc-500 text-xs font-medium">INR Only</span>
-                </div>
-              </div>
-              <p class="text-zinc-400 text-xs">Verify Razorpay checkout with all payment methods (UPI, Cards, NetBanking, International).</p>
-              <div class="h-[1px] bg-zinc-800 my-1"></div>
-              <ul class="flex flex-col gap-3 text-xs text-zinc-300">
-                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-400"></i> <strong class="text-white">1 Premium Credit</strong></li>
-                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Razorpay Checkout</li>
-                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> UPI & Global Cards</li>
-                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Sandbox & Live Ready</li>
-              </ul>
-            </div>
-            <button onclick="startRazorpayCheckout(1, 1, 'INR')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-95 cursor-pointer">
-              Test Razorpay (₹1)
             </button>
           </div>
 
@@ -988,60 +961,51 @@
 
     </main>
 
-    <!-- AUTH MODAL (Login / Signup) -->
+    <!-- AUTH MODAL (Google Sign-In Only) -->
     <div id="auth-modal" class="hidden modal-backdrop">
-      <div class="modal-content border border-zinc-800">
-        <!-- Tab Switches -->
-        <div class="flex border-b border-zinc-800 bg-zinc-900/60">
-          <button id="auth-tab-login" onclick="switchAuthTab('login')" class="flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-indigo-500 text-white cursor-pointer">
-            Log In
-          </button>
-          <button id="auth-tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 cursor-pointer">
-            Sign Up
-          </button>
+      <div class="modal-content border border-zinc-800 p-6 flex flex-col gap-6">
+        
+        <!-- Header / Presentation -->
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-indigo-950 text-indigo-400 rounded-2xl flex items-center justify-center text-xl shadow-inner border border-indigo-900/50">
+            <i class="fa-solid fa-user-shield text-indigo-400 animate-pulse"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white uppercase tracking-tight">Secure Sign In</h3>
+            <p class="text-indigo-400 text-[10px] uppercase tracking-widest font-bold">Google Auth Enabled</p>
+          </div>
         </div>
 
-        <!-- Form content -->
-        <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="p-6 flex flex-col gap-4">
-          <!-- Username field (only in signup) -->
-          <div id="auth-field-username" class="hidden flex flex-col gap-1.5">
-            <label for="auth-input-username" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Username</label>
-            <input type="text" id="auth-input-username" placeholder="e.g. prompt_wizard" class="form-input" />
-          </div>
+        <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 flex flex-col gap-2.5">
+          <p class="text-xs text-zinc-300 leading-relaxed">
+            Create an account or log in instantly using your Google Account to claim 90 FREE credits and securely track your prompt generation history.
+          </p>
+        </div>
 
-          <div class="flex flex-col gap-1.5">
-            <label for="auth-input-email" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Email Address</label>
-            <input type="email" id="auth-input-email" required placeholder="name@example.com" class="form-input" />
-          </div>
+        <!-- Google Sign-In Button (Visible) -->
+        <button type="button" onclick="handleGoogleSignIn()" class="w-full py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98]">
+          <i class="fa-brands fa-google text-red-500" style="color: #ea4335 !important;"></i>
+          <span>Continue with Google Account</span>
+        </button>
 
-          <div class="flex flex-col gap-1.5">
-            <label for="auth-input-password" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Password</label>
-            <input type="password" id="auth-input-password" required placeholder="••••••••" class="form-input" />
-          </div>
+        <button type="button" onclick="closeAuthModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer">
+          Cancel
+        </button>
 
-          <div id="auth-error-msg" class="text-xs text-rose-400 font-medium hidden"></div>
-
-          <button type="submit" id="auth-submit-btn" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all mt-2 cursor-pointer active:scale-95">
-            Proceed
-          </button>
-
-          <!-- Divider -->
-          <div class="flex items-center my-1.5">
-            <div class="flex-1 border-t border-zinc-800"></div>
-            <span class="px-3 text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Or continue with</span>
-            <div class="flex-1 border-t border-zinc-800"></div>
-          </div>
-
-          <!-- Google Sign-In Button -->
-          <button type="button" onclick="handleGoogleSignIn()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98]">
-            <i class="fa-brands fa-google text-red-500" style="color: #ea4335 !important;"></i>
-            <span>Google Account</span>
-          </button>
-
-          <button type="button" onclick="closeAuthModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all mt-1 cursor-pointer">
-            Cancel
-          </button>
-        </form>
+        <!-- Hidden Legacy Auth Form and Tab Buttons to avoid breaking JS scripts -->
+        <div class="hidden">
+          <button id="auth-tab-login"></button>
+          <button id="auth-tab-signup"></button>
+          <form id="auth-form" onsubmit="event.preventDefault()">
+            <div id="auth-field-username">
+              <input type="text" id="auth-input-username" />
+            </div>
+            <input type="email" id="auth-input-email" />
+            <input type="password" id="auth-input-password" />
+            <button type="submit" id="auth-submit-btn">Proceed</button>
+          </form>
+        </div>
+        <div id="auth-error-msg" class="text-xs text-rose-400 font-medium hidden"></div>
       </div>
     </div>
 
