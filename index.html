@@ -1692,10 +1692,10 @@
 
       // --- Helper to resolve API paths based on host environment ---
       function getApiUrl(path) {
-        const host = window.location.hostname;
-        const isDev = host === 'localhost' || host === '127.0.0.1' || host.includes('run.app');
-        const apiBase = isDev ? '' : 'https://gemini-prompt-generator-beta.vercel.app';
-        return apiBase + path;
+        // Since we are running a full-stack application, the frontend and Express backend
+        // are always hosted on the same origin. Returning a relative path is 100% reliable
+        // and completely avoids cross-origin CORS blocks or "Failed to fetch" errors.
+        return path;
       }
 
       // --- Firebase Auth & Initialization ---
