@@ -566,12 +566,12 @@
             if (typeof showView === 'function') {
               showView('dashboard');
               try {
-                window.history.pushState({}, '', '/dashboard');
+                window.history.pushState({}, '', '#dashboard');
               } catch (e) {
                 console.warn("History pushState blocked/failed:", e);
               }
             } else {
-              window.location.href = "/dashboard";
+              window.location.hash = "dashboard";
             }
           })
           .catch((error) => {
@@ -1712,20 +1712,32 @@
         if (viewName === 'generator') {
           viewGenerator.classList.remove('hidden');
           navGenerator.classList.add('active');
+          try {
+            window.history.replaceState(null, '', window.location.pathname + '#generator');
+          } catch (e) {}
         } else if (viewName === 'pricing') {
           viewPricing.classList.remove('hidden');
           navPricing.classList.add('active');
+          try {
+            window.history.replaceState(null, '', window.location.pathname + '#pricing');
+          } catch (e) {}
         } else if (viewName === 'dashboard') {
           if (!currentUser) {
             openAuthModal('login');
             // Select home / generator tab
             viewGenerator.classList.remove('hidden');
             navGenerator.classList.add('active');
+            try {
+              window.history.replaceState(null, '', window.location.pathname + '#generator');
+            } catch (e) {}
             return;
           }
           viewDashboard.classList.remove('hidden');
           navDashboard.classList.add('active');
           renderPromptHistory();
+          try {
+            window.history.replaceState(null, '', window.location.pathname + '#dashboard');
+          } catch (e) {}
         }
       }
 
@@ -2329,8 +2341,25 @@
       // Run profile loader and Firebase initialization on page start
       initFirebase().then(() => {
         const path = window.location.pathname;
-        if (path.includes('dashboard.html') || path.includes('dashboard')) {
+        const hash = window.location.hash;
+        if (path.includes('dashboard.html') || path.includes('dashboard') || hash.includes('dashboard')) {
           showView('dashboard');
+        } else if (path.includes('pricing') || hash.includes('pricing')) {
+          showView('pricing');
+        } else {
+          showView('generator');
+        }
+      });
+
+      // Handle browser back/forward navigation using URL hashes
+      window.addEventListener('hashchange', () => {
+        const hash = window.location.hash;
+        if (hash.includes('dashboard')) {
+          showView('dashboard');
+        } else if (hash.includes('pricing')) {
+          showView('pricing');
+        } else {
+          showView('generator');
         }
       });
     </script>
