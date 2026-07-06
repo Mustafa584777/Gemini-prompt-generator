@@ -4,7 +4,7 @@ import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { getAuthenticatedUser as verifyFirebaseToken, firestoreDb, generateToken } from "./server-firebase";
+import { getAuthenticatedUser as verifyFirebaseToken, firestoreDb, generateToken, firebaseAuthSignUp, firebaseAuthSignIn, hashPassword } from "./server-firebase";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
@@ -35,11 +35,15 @@ async function getAuthenticatedUser(req: any) {
     return null;
   }
   const email = authUser.email;
-  let profile = await firestoreDb.getUser(email);
+  // Get the token from authorization header to use in Firestore REST calls
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+  const idToken = authHeader && authHeader.toLowerCase().startsWith("bearer ") ? authHeader.substring(7) : undefined;
+
+  let profile = await firestoreDb.getUser(email, idToken);
   if (!profile) {
-    profile = await firestoreDb.createUser(email, authUser.name || email.split('@')[0], 90);
+    profile = await firestoreDb.createUser(email, authUser.name || email.split('@')[0], 90, idToken);
   }
-  return profile;
+  return { ...profile, idToken };
 }
 
 // Auth API - Get Current Profile (Me)
@@ -75,17 +79,27 @@ app.post("/api/auth/custom-signup", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 6 characters long." });
     }
     
-    const existing = await firestoreDb.getUser(email);
-    if (existing) {
-      return res.status(400).json({ error: "Email address is already registered." });
+    // Try to register in Firebase Auth first
+    let idToken: string;
+    try {
+      const authResult = await firebaseAuthSignUp(email, password);
+      if (!authResult) {
+        throw new Error("Failed to register in Firebase Auth.");
+      }
+      idToken = authResult.idToken;
+    } catch (err: any) {
+      if (err.message && (err.message.includes("EMAIL_EXISTS") || err.message.includes("already registered") || err.message.includes("already in use"))) {
+        return res.status(400).json({ error: "Email address is already registered." });
+      }
+      throw err;
     }
 
-    const newUser = await firestoreDb.createUserWithPassword(email, username, password, 90);
-    const token = generateToken(email);
+    // Register in Firestore using the idToken
+    const newUser = await firestoreDb.createUserWithPassword(email, username, password, 90, idToken);
 
     res.json({
       success: true,
-      token,
+      token: idToken,
       user: newUser
     });
   } catch (error: any) {
@@ -102,16 +116,52 @@ app.post("/api/auth/custom-login", async (req, res) => {
       return res.status(400).json({ error: "Email and password are required." });
     }
 
-    const user = await firestoreDb.verifyUserPassword(email, password);
-    if (!user) {
-      return res.status(401).json({ error: "Invalid email address or password. Please check your credentials or register a new account." });
-    }
+    let idToken: string | null = null;
+    let user: any = null;
 
-    const token = generateToken(email);
+    try {
+      // 1. Try standard Firebase Auth Login
+      const authResult = await firebaseAuthSignIn(email, password);
+      if (authResult) {
+        idToken = authResult.idToken;
+        user = await firestoreDb.getUser(email, idToken);
+      }
+    } catch (authErr: any) {
+      // 2. If user not found in Firebase Auth, check if they exist in Firestore legacy database
+      const errMessage = authErr.message || "";
+      if (errMessage.includes("EMAIL_NOT_FOUND") || errMessage.includes("USER_NOT_FOUND")) {
+        const legacyUser = await firestoreDb.verifyUserPassword(email, password);
+        if (legacyUser) {
+          // Password is correct! Migrate them to Firebase Auth dynamically
+          try {
+            const signupResult = await firebaseAuthSignUp(email, password);
+            if (signupResult) {
+              idToken = signupResult.idToken;
+              // Save the updated profile to Firestore with the idToken
+              await firestoreDb.setUser(email, {
+                username: legacyUser.username,
+                email: legacyUser.email,
+                credits: legacyUser.credits,
+                promptHistory: legacyUser.promptHistory || [],
+                passwordHash: hashPassword(password)
+              }, idToken);
+              user = legacyUser;
+            }
+          } catch (migrateErr) {
+            console.error("Failed to migrate legacy user:", migrateErr);
+          }
+        }
+      }
+      
+      if (!idToken || !user) {
+        // Real invalid credentials
+        return res.status(401).json({ error: "Invalid email address or password. Please check your credentials." });
+      }
+    }
 
     res.json({
       success: true,
-      token,
+      token: idToken,
       user
     });
   } catch (error: any) {
@@ -271,7 +321,7 @@ app.post("/api/payment/verify", async (req, res) => {
     }
 
     // Credit user's account in Firestore
-    const updatedUser = await firestoreDb.addCredits(profile.email, Number(credits));
+    const updatedUser = await firestoreDb.addCredits(profile.email, Number(credits), profile.idToken);
     if (!updatedUser) {
       return res.status(404).json({ error: "User profile not found." });
     }
@@ -304,7 +354,7 @@ app.post("/api/user/add-credits", async (req, res) => {
 
     // Give 50 credits on $5, and proportional credits for larger amounts
     const creditsToAdd = Math.floor((Number(amount) / 5) * 50);
-    const updatedUser = await firestoreDb.addCredits(profile.email, creditsToAdd);
+    const updatedUser = await firestoreDb.addCredits(profile.email, creditsToAdd, profile.idToken);
 
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
@@ -395,10 +445,10 @@ app.post("/api/generate-prompt", async (req, res) => {
 
     // If authenticated user, deduct 30 credits and record in prompt history
     let remainingCredits = null;
-    if (userEmail) {
-      const success = await firestoreDb.deductCredit(userEmail, 30);
+    if (userEmail && profile) {
+      const success = await firestoreDb.deductCredit(userEmail, 30, profile.idToken);
       if (success) {
-        const updatedUser = await firestoreDb.addPromptToHistory(userEmail, promptType, customInstructions, generatedPrompt);
+        const updatedUser = await firestoreDb.addPromptToHistory(userEmail, promptType, customInstructions, generatedPrompt, profile.idToken);
         if (updatedUser) {
           remainingCredits = updatedUser.credits;
         }

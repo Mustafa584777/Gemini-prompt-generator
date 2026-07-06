@@ -205,13 +205,68 @@ function fromFirestoreValue(val: any): any {
   return null;
 }
 
+// Firebase Auth REST API Helper Functions
+export async function firebaseAuthSignUp(email: string, passwordPlain: string): Promise<{ idToken: string; localId: string } | null> {
+  try {
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password: passwordPlain,
+        returnSecureToken: true
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      const message = err.error?.message || "SignUp failed";
+      throw new Error(message);
+    }
+    const data = await res.json();
+    return { idToken: data.idToken, localId: data.localId };
+  } catch (err: any) {
+    console.error("Firebase Auth REST SignUp error:", err);
+    throw err;
+  }
+}
+
+export async function firebaseAuthSignIn(email: string, passwordPlain: string): Promise<{ idToken: string; localId: string } | null> {
+  try {
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password: passwordPlain,
+        returnSecureToken: true
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      const message = err.error?.message || "SignIn failed";
+      throw new Error(message);
+    }
+    const data = await res.json();
+    return { idToken: data.idToken, localId: data.localId };
+  } catch (err: any) {
+    console.error("Firebase Auth REST SignIn error:", err);
+    throw err;
+  }
+}
+
 // Robust Firestore client utilizing direct HTTP REST calls
 export const firestoreDb = {
-  async getUser(email: string): Promise<UserProfile | null> {
+  async getUser(email: string, idToken?: string): Promise<UserProfile | null> {
     const cleanEmail = email.trim().toLowerCase();
     try {
       const url = `${baseUrl}/users/${encodeURIComponent(cleanEmail)}?key=${apiKey}`;
-      const res = await fetch(url);
+      const headers: Record<string, string> = {};
+      if (idToken) {
+        headers["Authorization"] = `Bearer ${idToken}`;
+      }
+      const res = await fetch(url, { headers });
       if (res.status === 404) {
         return null;
       }
@@ -236,16 +291,20 @@ export const firestoreDb = {
     }
   },
 
-  async setUser(email: string, profile: UserProfile): Promise<void> {
+  async setUser(email: string, profile: UserProfile, idToken?: string): Promise<void> {
     const cleanEmail = email.trim().toLowerCase();
     const fields: any = {};
     for (const [k, v] of Object.entries(profile)) {
       fields[k] = toFirestoreValue(v);
     }
     const url = `${baseUrl}/users/${encodeURIComponent(cleanEmail)}?key=${apiKey}`;
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (idToken) {
+      headers["Authorization"] = `Bearer ${idToken}`;
+    }
     const res = await fetch(url, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ fields })
     });
     if (!res.ok) {
@@ -254,7 +313,7 @@ export const firestoreDb = {
     }
   },
 
-  async createUser(email: string, username: string, initialCredits: number = 90): Promise<UserProfile> {
+  async createUser(email: string, username: string, initialCredits: number = 90, idToken?: string): Promise<UserProfile> {
     const cleanEmail = email.trim().toLowerCase();
     const newUser: UserProfile = {
       username: username.trim(),
@@ -263,7 +322,7 @@ export const firestoreDb = {
       promptHistory: []
     };
     try {
-      await this.setUser(cleanEmail, newUser);
+      await this.setUser(cleanEmail, newUser, idToken);
       return newUser;
     } catch (err) {
       console.warn("Firestore REST error in createUser, falling back to local memory:", err);
@@ -274,7 +333,7 @@ export const firestoreDb = {
     }
   },
 
-  async createUserWithPassword(email: string, username: string, passwordPlain: string, initialCredits: number = 90): Promise<UserProfile> {
+  async createUserWithPassword(email: string, username: string, passwordPlain: string, initialCredits: number = 90, idToken?: string): Promise<UserProfile> {
     const cleanEmail = email.trim().toLowerCase();
     const passwordHash = hashPassword(passwordPlain);
     const newUser: UserProfile = {
@@ -285,7 +344,7 @@ export const firestoreDb = {
       passwordHash: passwordHash
     };
     try {
-      await this.setUser(cleanEmail, newUser);
+      await this.setUser(cleanEmail, newUser, idToken);
       return {
         username: newUser.username,
         email: newUser.email,
@@ -336,13 +395,13 @@ export const firestoreDb = {
     }
   },
 
-  async addCredits(email: string, amount: number): Promise<UserProfile | null> {
+  async addCredits(email: string, amount: number, idToken?: string): Promise<UserProfile | null> {
     const cleanEmail = email.trim().toLowerCase();
     try {
-      const profile = await this.getUser(cleanEmail);
+      const profile = await this.getUser(cleanEmail, idToken);
       if (!profile) return null;
       profile.credits = (profile.credits || 0) + amount;
-      await this.setUser(cleanEmail, profile);
+      await this.setUser(cleanEmail, profile, idToken);
       return profile;
     } catch (err) {
       console.warn("Firestore REST error in addCredits, falling back to local database:", err);
@@ -356,15 +415,15 @@ export const firestoreDb = {
     }
   },
 
-  async deductCredit(email: string, amount: number = 30): Promise<boolean> {
+  async deductCredit(email: string, amount: number = 30, idToken?: string): Promise<boolean> {
     const cleanEmail = email.trim().toLowerCase();
     try {
-      const profile = await this.getUser(cleanEmail);
+      const profile = await this.getUser(cleanEmail, idToken);
       if (!profile) return false;
       const currentCredits = profile.credits ?? 0;
       if (currentCredits < amount) return false;
       profile.credits = currentCredits - amount;
-      await this.setUser(cleanEmail, profile);
+      await this.setUser(cleanEmail, profile, idToken);
       return true;
     } catch (err) {
       console.warn("Firestore REST error in deductCredit, falling back to local database:", err);
@@ -385,7 +444,8 @@ export const firestoreDb = {
     email: string,
     promptType: string,
     customInstructions: string,
-    generatedPrompt: string
+    generatedPrompt: string,
+    idToken?: string
   ): Promise<UserProfile | null> {
     const cleanEmail = email.trim().toLowerCase();
     const newPrompt = {
@@ -395,11 +455,11 @@ export const firestoreDb = {
       timestamp: new Date().toISOString()
     };
     try {
-      const profile = await this.getUser(cleanEmail);
+      const profile = await this.getUser(cleanEmail, idToken);
       if (!profile) return null;
       const history = profile.promptHistory || [];
       profile.promptHistory = [newPrompt, ...history];
-      await this.setUser(cleanEmail, profile);
+      await this.setUser(cleanEmail, profile, idToken);
       return profile;
     } catch (err) {
       console.warn("Firestore REST error in addPromptToHistory, falling back to local database:", err);
