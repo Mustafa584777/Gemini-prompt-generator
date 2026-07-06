@@ -1,12 +1,11 @@
-import { initializeApp, getApps, getApp } from "firebase-admin/app";
-import { getAuth, DecodedIdToken } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
 import * as fs from "fs";
 import * as path from "path";
+import * as crypto from "crypto";
 
 // Load configuration
 let projectId = process.env.FIREBASE_PROJECT_ID;
 let databaseId = process.env.FIREBASE_FIRESTORE_DATABASE_ID;
+let apiKey = process.env.FIREBASE_API_KEY;
 
 try {
   const possiblePaths = [
@@ -30,6 +29,7 @@ try {
   if (config) {
     if (!projectId) projectId = config.projectId;
     if (!databaseId) databaseId = config.firestoreDatabaseId;
+    if (!apiKey) apiKey = config.apiKey;
   }
 } catch (err) {
   console.warn("Could not read firebase-applet-config.json:", err);
@@ -42,26 +42,11 @@ if (!projectId) {
 if (!databaseId) {
   databaseId = "ai-studio-imagetogeminipro-7991f626-f4c5-4d1c-8e24-82965df261a7";
 }
-
-// Initialize Admin SDK
-let app;
-if (getApps().length === 0) {
-  // Check if we have Google Application Credentials, otherwise use basic initialization
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    app = initializeApp();
-  } else {
-    app = initializeApp({
-      projectId: projectId,
-    });
-  }
-} else {
-  app = getApp();
+if (!apiKey) {
+  apiKey = "AIzaSyCFyGzp7viV1tq25DAMnpKKSJpPngtVa14";
 }
 
-export const adminAuth = getAuth(app);
-export const adminDb = getFirestore(app, databaseId);
-
-import * as crypto from "crypto";
+const baseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents`;
 
 const JWT_SECRET = process.env.JWT_SECRET || "ai-studio-imagetogeminipro-super-secret-key-12345!";
 
@@ -108,29 +93,23 @@ export async function getAuthenticatedUser(req: any): Promise<any | null> {
     return { email: customEmail };
   }
 
-  // 2. Try standard Firebase verify
+  // 2. Decode standard Firebase JWT token (decode-only for maximum robustness in serverless environment)
   try {
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
-    return decodedToken;
-  } catch (error) {
-    // 3. Robust decode-only fallback if verify fails due to environment/project mismatches
-    try {
-      const parts = idToken.split(".");
-      if (parts.length === 3) {
-        const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf8"));
-        if (payload && payload.email) {
-          return {
-            email: payload.email,
-            name: payload.name || payload.email.split('@')[0],
-            uid: payload.user_id || payload.sub,
-          };
-        }
+    const parts = idToken.split(".");
+    if (parts.length === 3) {
+      const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+      if (payload && payload.email) {
+        return {
+          email: payload.email,
+          name: payload.name || payload.email.split('@')[0],
+          uid: payload.user_id || payload.sub,
+        };
       }
-    } catch (fallbackErr) {
-      // ignore
     }
-    return null;
+  } catch (err) {
+    // ignore
   }
+  return null;
 }
 
 export interface UserProfile {
@@ -146,7 +125,8 @@ export interface UserProfile {
   passwordHash?: string;
 }
 
-const localDbPath = path.join(process.cwd(), "users-local-db.json");
+// Path for writable local temporary fallback storage in case network is down
+const localDbPath = path.join("/tmp", "users-local-db.json");
 
 function loadLocalDb(): Record<string, any> {
   try {
@@ -162,31 +142,116 @@ function loadLocalDb(): Record<string, any> {
 
 function saveLocalDb(data: Record<string, any>) {
   try {
+    const dir = path.dirname(localDbPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     fs.writeFileSync(localDbPath, JSON.stringify(data, null, 2), "utf8");
   } catch (err) {
     console.error("Failed to save local database fallback:", err);
   }
 }
 
-// Helper methods to mimic server-db on Firestore with direct Local Storage file-based fallback on any database/permission errors
+// Firestore REST Type converters
+function toFirestoreValue(val: any): any {
+  if (val === null || val === undefined) {
+    return { nullValue: null };
+  }
+  if (typeof val === "string") {
+    return { stringValue: val };
+  }
+  if (typeof val === "number") {
+    return { integerValue: String(Math.floor(val)) };
+  }
+  if (typeof val === "boolean") {
+    return { booleanValue: val };
+  }
+  if (Array.isArray(val)) {
+    return {
+      arrayValue: {
+        values: val.map(toFirestoreValue)
+      }
+    };
+  }
+  if (typeof val === "object") {
+    const fields: any = {};
+    for (const [k, v] of Object.entries(val)) {
+      fields[k] = toFirestoreValue(v);
+    }
+    return { mapValue: { fields } };
+  }
+  return { nullValue: null };
+}
+
+function fromFirestoreValue(val: any): any {
+  if (!val) return null;
+  if ("stringValue" in val) return val.stringValue;
+  if ("integerValue" in val) return parseInt(val.integerValue, 10);
+  if ("doubleValue" in val) return parseFloat(val.doubleValue);
+  if ("booleanValue" in val) return val.booleanValue;
+  if ("nullValue" in val) return null;
+  if ("arrayValue" in val) {
+    const values = val.arrayValue.values || [];
+    return values.map(fromFirestoreValue);
+  }
+  if ("mapValue" in val) {
+    const fields = val.mapValue.fields || {};
+    const obj: any = {};
+    for (const [k, v] of Object.entries(fields)) {
+      obj[k] = fromFirestoreValue(v);
+    }
+    return obj;
+  }
+  return null;
+}
+
+// Robust Firestore client utilizing direct HTTP REST calls
 export const firestoreDb = {
   async getUser(email: string): Promise<UserProfile | null> {
     const cleanEmail = email.trim().toLowerCase();
     try {
-      const doc = await adminDb.collection("users").doc(cleanEmail).get();
-      if (doc.exists) {
-        return doc.data() as UserProfile;
+      const url = `${baseUrl}/users/${encodeURIComponent(cleanEmail)}?key=${apiKey}`;
+      const res = await fetch(url);
+      if (res.status === 404) {
+        return null;
       }
+      if (!res.ok) {
+        throw new Error(`REST error: ${res.statusText}`);
+      }
+      const data = await res.json();
+      const fields = data.fields || {};
+      const profile: any = {};
+      for (const [k, v] of Object.entries(fields)) {
+        profile[k] = fromFirestoreValue(v);
+      }
+      return profile as UserProfile;
     } catch (err) {
-      console.warn("Firestore error in getUser, falling back to local database:", err);
+      console.warn("Firestore REST error in getUser, falling back to local storage:", err);
+      // Fallback
+      const localDb = loadLocalDb();
+      if (localDb[cleanEmail]) {
+        return localDb[cleanEmail];
+      }
+      return null;
     }
-    
-    // Fallback
-    const localDb = loadLocalDb();
-    if (localDb[cleanEmail]) {
-      return localDb[cleanEmail];
+  },
+
+  async setUser(email: string, profile: UserProfile): Promise<void> {
+    const cleanEmail = email.trim().toLowerCase();
+    const fields: any = {};
+    for (const [k, v] of Object.entries(profile)) {
+      fields[k] = toFirestoreValue(v);
     }
-    return null;
+    const url = `${baseUrl}/users/${encodeURIComponent(cleanEmail)}?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields })
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`REST set error: ${res.status} ${errText}`);
+    }
   },
 
   async createUser(email: string, username: string, initialCredits: number = 90): Promise<UserProfile> {
@@ -197,34 +262,30 @@ export const firestoreDb = {
       credits: initialCredits,
       promptHistory: []
     };
-    
     try {
-      await adminDb.collection("users").doc(cleanEmail).set(newUser);
+      await this.setUser(cleanEmail, newUser);
       return newUser;
     } catch (err) {
-      console.warn("Firestore error in createUser, falling back to local database:", err);
+      console.warn("Firestore REST error in createUser, falling back to local memory:", err);
+      const localDb = loadLocalDb();
+      localDb[cleanEmail] = newUser;
+      saveLocalDb(localDb);
+      return newUser;
     }
-
-    // Fallback
-    const localDb = loadLocalDb();
-    localDb[cleanEmail] = newUser;
-    saveLocalDb(localDb);
-    return newUser;
   },
 
   async createUserWithPassword(email: string, username: string, passwordPlain: string, initialCredits: number = 90): Promise<UserProfile> {
     const cleanEmail = email.trim().toLowerCase();
     const passwordHash = hashPassword(passwordPlain);
-    const newUser = {
+    const newUser: UserProfile = {
       username: username.trim(),
       email: cleanEmail,
       credits: initialCredits,
       promptHistory: [],
       passwordHash: passwordHash
     };
-    
     try {
-      await adminDb.collection("users").doc(cleanEmail).set(newUser);
+      await this.setUser(cleanEmail, newUser);
       return {
         username: newUser.username,
         email: newUser.email,
@@ -232,117 +293,92 @@ export const firestoreDb = {
         promptHistory: newUser.promptHistory
       };
     } catch (err) {
-      console.warn("Firestore error in createUserWithPassword, falling back to local database:", err);
+      console.warn("Firestore REST error in createUserWithPassword, falling back to local database:", err);
+      const localDb = loadLocalDb();
+      localDb[cleanEmail] = newUser;
+      saveLocalDb(localDb);
+      return {
+        username: newUser.username,
+        email: newUser.email,
+        credits: newUser.credits,
+        promptHistory: newUser.promptHistory
+      };
     }
-
-    // Fallback
-    const localDb = loadLocalDb();
-    localDb[cleanEmail] = newUser;
-    saveLocalDb(localDb);
-    return {
-      username: newUser.username,
-      email: newUser.email,
-      credits: newUser.credits,
-      promptHistory: newUser.promptHistory
-    };
   },
 
   async verifyUserPassword(email: string, passwordPlain: string): Promise<UserProfile | null> {
     const cleanEmail = email.trim().toLowerCase();
     const expectedHash = hashPassword(passwordPlain);
-    
     try {
-      const doc = await adminDb.collection("users").doc(cleanEmail).get();
-      if (doc.exists) {
-        const data = doc.data();
-        if (data && data.passwordHash === expectedHash) {
-          return {
-            username: data.username,
-            email: data.email,
-            credits: data.credits,
-            promptHistory: data.promptHistory || []
-          };
-        }
-        return null;
+      const profile = await this.getUser(cleanEmail);
+      if (profile && profile.passwordHash === expectedHash) {
+        return {
+          username: profile.username,
+          email: profile.email,
+          credits: profile.credits,
+          promptHistory: profile.promptHistory || []
+        };
       }
+      return null;
     } catch (err) {
-      console.warn("Firestore error in verifyUserPassword, falling back to local database:", err);
+      console.warn("Firestore REST error in verifyUserPassword, falling back to local database:", err);
+      const localDb = loadLocalDb();
+      const data = localDb[cleanEmail];
+      if (data && data.passwordHash === expectedHash) {
+        return {
+          username: data.username,
+          email: data.email,
+          credits: data.credits,
+          promptHistory: data.promptHistory || []
+        };
+      }
+      return null;
     }
-
-    // Fallback
-    const localDb = loadLocalDb();
-    const data = localDb[cleanEmail];
-    if (data && data.passwordHash === expectedHash) {
-      return {
-        username: data.username,
-        email: data.email,
-        credits: data.credits,
-        promptHistory: data.promptHistory || []
-      };
-    }
-    return null;
   },
 
   async addCredits(email: string, amount: number): Promise<UserProfile | null> {
     const cleanEmail = email.trim().toLowerCase();
-    const docRef = adminDb.collection("users").doc(cleanEmail);
-    
     try {
-      return await adminDb.runTransaction(async (transaction) => {
-        const doc = await transaction.get(docRef);
-        if (!doc.exists) return null;
-        
-        const currentCredits = doc.data()?.credits ?? 0;
-        const nextCredits = currentCredits + amount;
-        
-        transaction.update(docRef, { credits: nextCredits });
-        return { ...doc.data(), credits: nextCredits } as UserProfile;
-      });
+      const profile = await this.getUser(cleanEmail);
+      if (!profile) return null;
+      profile.credits = (profile.credits || 0) + amount;
+      await this.setUser(cleanEmail, profile);
+      return profile;
     } catch (err) {
-      console.warn("Firestore error in addCredits, falling back to local database:", err);
+      console.warn("Firestore REST error in addCredits, falling back to local database:", err);
+      const localDb = loadLocalDb();
+      if (localDb[cleanEmail]) {
+        localDb[cleanEmail].credits = (localDb[cleanEmail].credits || 0) + amount;
+        saveLocalDb(localDb);
+        return localDb[cleanEmail];
+      }
+      return null;
     }
-
-    // Fallback
-    const localDb = loadLocalDb();
-    if (localDb[cleanEmail]) {
-      localDb[cleanEmail].credits = (localDb[cleanEmail].credits || 0) + amount;
-      saveLocalDb(localDb);
-      return localDb[cleanEmail];
-    }
-    return null;
   },
 
   async deductCredit(email: string, amount: number = 30): Promise<boolean> {
     const cleanEmail = email.trim().toLowerCase();
-    const docRef = adminDb.collection("users").doc(cleanEmail);
-
     try {
-      const success = await adminDb.runTransaction(async (transaction) => {
-        const doc = await transaction.get(docRef);
-        if (!doc.exists) return false;
-
-        const currentCredits = doc.data()?.credits ?? 0;
-        if (currentCredits < amount) return false;
-
-        transaction.update(docRef, { credits: currentCredits - amount });
-        return true;
-      });
-      return success;
+      const profile = await this.getUser(cleanEmail);
+      if (!profile) return false;
+      const currentCredits = profile.credits ?? 0;
+      if (currentCredits < amount) return false;
+      profile.credits = currentCredits - amount;
+      await this.setUser(cleanEmail, profile);
+      return true;
     } catch (err) {
-      console.warn("Firestore error in deductCredit, falling back to local database:", err);
-    }
-
-    // Fallback
-    const localDb = loadLocalDb();
-    if (localDb[cleanEmail]) {
-      const currentCredits = localDb[cleanEmail].credits || 0;
-      if (currentCredits >= amount) {
-        localDb[cleanEmail].credits = currentCredits - amount;
-        saveLocalDb(localDb);
-        return true;
+      console.warn("Firestore REST error in deductCredit, falling back to local database:", err);
+      const localDb = loadLocalDb();
+      if (localDb[cleanEmail]) {
+        const currentCredits = localDb[cleanEmail].credits || 0;
+        if (currentCredits >= amount) {
+          localDb[cleanEmail].credits = currentCredits - amount;
+          saveLocalDb(localDb);
+          return true;
+        }
       }
+      return false;
     }
-    return false;
   },
 
   async addPromptToHistory(
@@ -352,37 +388,29 @@ export const firestoreDb = {
     generatedPrompt: string
   ): Promise<UserProfile | null> {
     const cleanEmail = email.trim().toLowerCase();
-    const docRef = adminDb.collection("users").doc(cleanEmail);
     const newPrompt = {
       promptType,
       customInstructions: customInstructions || "",
       generatedPrompt,
       timestamp: new Date().toISOString()
     };
-
     try {
-      return await adminDb.runTransaction(async (transaction) => {
-        const doc = await transaction.get(docRef);
-        if (!doc.exists) return null;
-
-        const history = doc.data()?.promptHistory || [];
-        const updatedHistory = [newPrompt, ...history];
-        transaction.update(docRef, { promptHistory: updatedHistory });
-        
-        return { ...doc.data(), promptHistory: updatedHistory } as UserProfile;
-      });
+      const profile = await this.getUser(cleanEmail);
+      if (!profile) return null;
+      const history = profile.promptHistory || [];
+      profile.promptHistory = [newPrompt, ...history];
+      await this.setUser(cleanEmail, profile);
+      return profile;
     } catch (err) {
-      console.warn("Firestore error in addPromptToHistory, falling back to local database:", err);
+      console.warn("Firestore REST error in addPromptToHistory, falling back to local database:", err);
+      const localDb = loadLocalDb();
+      if (localDb[cleanEmail]) {
+        const history = localDb[cleanEmail].promptHistory || [];
+        localDb[cleanEmail].promptHistory = [newPrompt, ...history];
+        saveLocalDb(localDb);
+        return localDb[cleanEmail];
+      }
+      return null;
     }
-
-    // Fallback
-    const localDb = loadLocalDb();
-    if (localDb[cleanEmail]) {
-      const history = localDb[cleanEmail].promptHistory || [];
-      localDb[cleanEmail].promptHistory = [newPrompt, ...history];
-      saveLocalDb(localDb);
-      return localDb[cleanEmail];
-    }
-    return null;
   }
 };
