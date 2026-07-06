@@ -29,18 +29,29 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // Helper to authenticate user and auto-create Firestore profile if they are new
 async function getAuthenticatedUser(req: any) {
+  console.log("server: getAuthenticatedUser: Started verification for headers:", req.headers.authorization ? req.headers.authorization.substring(0, 30) + "..." : "none");
   const authUser = await verifyFirebaseToken(req);
-  if (!authUser || !authUser.email) {
+  if (!authUser) {
+    console.log("server: getAuthenticatedUser: verifyFirebaseToken returned null authUser");
+    return null;
+  }
+  if (!authUser.email) {
+    console.log("server: getAuthenticatedUser: authUser has no email", authUser);
     return null;
   }
   const email = authUser.email;
+  console.log("server: getAuthenticatedUser: Verified user email:", email);
+  
   // Get the token from authorization header to use in Firestore REST calls
   const authHeader = req.headers.authorization || req.headers.Authorization;
   const idToken = authHeader && authHeader.toLowerCase().startsWith("bearer ") ? authHeader.substring(7) : undefined;
 
   let profile = await firestoreDb.getUser(email, idToken);
   if (!profile) {
+    console.log("server: getAuthenticatedUser: No profile found for email, creating a new one...");
     profile = await firestoreDb.createUser(email, authUser.name || email.split('@')[0], 90, idToken);
+  } else {
+    console.log("server: getAuthenticatedUser: Loaded profile from db:", profile.username);
   }
   return { ...profile, idToken };
 }

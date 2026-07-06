@@ -63,7 +63,8 @@ export function verifyToken(token: string): string | null {
     const expectedSignature = crypto.createHmac("sha256", JWT_SECRET).update(`${header}.${payload}`).digest("base64url");
     if (signature !== expectedSignature) return null;
     
-    const decodedPayload = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = JSON.parse(Buffer.from(base64, "base64").toString("utf8"));
     if (decodedPayload.exp && decodedPayload.exp < Math.floor(Date.now() / 1000)) {
       return null;
     }
@@ -81,6 +82,7 @@ export function hashPassword(password: string): string {
 export async function getAuthenticatedUser(req: any): Promise<any | null> {
   const authHeader = req.headers.authorization || req.headers.Authorization;
   if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
+    console.log("server-firebase: getAuthenticatedUser: Authorization header is missing or does not start with Bearer");
     return null;
   }
   const idToken = authHeader.substring(7);
@@ -88,6 +90,7 @@ export async function getAuthenticatedUser(req: any): Promise<any | null> {
   // 1. Try our custom JWT verifier first (which bypasses Firebase completely and is fast)
   const customEmail = verifyToken(idToken);
   if (customEmail) {
+    console.log("server-firebase: getAuthenticatedUser: custom token verified for", customEmail);
     return { email: customEmail };
   }
 
@@ -95,17 +98,23 @@ export async function getAuthenticatedUser(req: any): Promise<any | null> {
   try {
     const parts = idToken.split(".");
     if (parts.length === 3) {
-      const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+      const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const payload = JSON.parse(Buffer.from(base64, "base64").toString("utf8"));
+      console.log("server-firebase: getAuthenticatedUser: decoded Firebase token payload", payload);
       if (payload && payload.email) {
         return {
           email: payload.email,
           name: payload.name || payload.email.split('@')[0],
           uid: payload.user_id || payload.sub,
         };
+      } else {
+        console.log("server-firebase: getAuthenticatedUser: Firebase token payload has no email field", payload);
       }
+    } else {
+      console.log("server-firebase: getAuthenticatedUser: token does not have 3 parts", parts.length);
     }
-  } catch (err) {
-    // ignore
+  } catch (err: any) {
+    console.error("server-firebase: getAuthenticatedUser: Error decoding standard Firebase ID token", err);
   }
   return null;
 }

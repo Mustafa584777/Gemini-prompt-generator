@@ -1828,9 +1828,19 @@
                   setSessionToken(idToken);
                   await checkAuthMe();
                 } else {
-                  setSessionToken(null);
-                  currentUser = null;
-                  updateUserUI();
+                  // If user is null, they might have signed in using custom email/password
+                  // So we check if there is an existing session token, and try to verify it first.
+                  const existingToken = getSessionToken();
+                  if (existingToken) {
+                    await checkAuthMe();
+                  }
+                  
+                  // If we still don't have a currentUser, then clear everything
+                  if (!currentUser) {
+                    setSessionToken(null);
+                    currentUser = null;
+                    updateUserUI();
+                  }
                 }
               } catch (e) {
                 console.error("Error in onAuthStateChanged handler:", e);
