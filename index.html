@@ -514,6 +514,64 @@
         letter-spacing: 0.05em;
       }
     </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script>
+      // Firebase Config
+      const firebaseConfig = {
+        apiKey: "AIzaSyCFyGzp7v1vitq250MMhpkK3JjpPngtVa14",
+        authDomain: "gen-lang-client-0844549707.firebaseapp.com",
+        projectId: "gen-lang-client-0844549707",
+        storageBucket: "gen-lang-client-0844549707.firebaseapp.com",
+        messagingSenderId: "845800015860",
+        appId: "1:845800015860:web:a6229be7846b5991785be1"
+      };
+
+      // Initialize Firebase (Safely check if already initialized)
+      let defaultApp;
+      if (firebase.apps.length === 0) {
+        defaultApp = firebase.initializeApp(firebaseConfig);
+      } else {
+        defaultApp = firebase.app();
+      }
+      const authInstance = firebase.auth();
+
+      // Google Sign In Function
+      async function signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+
+        try {
+          const result = await authInstance.signInWithPopup(provider);
+          console.log("User signed in:", result.user);
+          
+          // Get the Firebase ID token and store it so Express server can verify it
+          const idToken = await result.user.getIdToken();
+          localStorage.setItem('auth_token', idToken);
+
+          // Synchronize session state if the SPA body scripts are loaded
+          if (typeof checkAuthMe === 'function') {
+            await checkAuthMe();
+          }
+          if (typeof closeAuthModal === 'function') {
+            closeAuthModal();
+          }
+          if (typeof showView === 'function') {
+            showView('dashboard');
+            showToast('Authentication Successful', `Welcome, ${result.user.displayName || 'User'}!`);
+          } else {
+            // Fallback: window.location.href = "/dashboard.html";
+            window.location.href = "/dashboard.html"; // apna dashboard page
+          }
+        } catch (error) {
+          console.error("Sign in error:", error);
+          alert("Login failed: " + error.message);
+        }
+      }
+    </script>
   </head>
   <body class="font-sans antialiased text-zinc-100 min-h-screen flex flex-col bg-zinc-950">
     <!-- Navigation Bar / Header -->
@@ -1184,7 +1242,7 @@
       let selectedModifiers = new Set();
 
       // Firebase client global instance
-      let auth = null;
+      let auth = (typeof authInstance !== 'undefined') ? authInstance : null;
       let firebaseInitError = null;
 
       // Helper to load scripts dynamically
@@ -1744,15 +1802,20 @@
           // Use static configuration directly to support static HTML environments cleanly
           const config = {
             projectId: "gen-lang-client-0844549707",
-            appId: "1:845800015860:web:a6229be704605991785ba1",
-            apiKey: "AIzaSyCFyGzp7viV1tq25DAMnpKKSJpPngtVa14",
+            appId: "1:845800015860:web:a6229be7846b5991785be1",
+            apiKey: "AIzaSyCFyGzp7v1vitq250MMhpkK3JjpPngtVa14",
             authDomain: "gen-lang-client-0844549707.firebaseapp.com",
             firestoreDatabaseId: "ai-studio-imagetogeminipro-7991f626-f4c5-4d1c-8e24-82965df261a7",
-            storageBucket: "gen-lang-client-0844549707.firebasestorage.app",
+            storageBucket: "gen-lang-client-0844549707.firebaseapp.com",
             messagingSenderId: "845800015860"
           };
 
-          const app = firebase.initializeApp(config);
+          let appInstance;
+          if (firebase.apps.length === 0) {
+            appInstance = firebase.initializeApp(config);
+          } else {
+            appInstance = firebase.app();
+          }
           auth = firebase.auth();
           
           // Listen to firebase auth state changes

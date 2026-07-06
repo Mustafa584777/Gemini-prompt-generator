@@ -41,7 +41,7 @@ if (!databaseId) {
   databaseId = "ai-studio-imagetogeminipro-7991f626-f4c5-4d1c-8e24-82965df261a7";
 }
 if (!apiKey) {
-  apiKey = "AIzaSyCFyGzp7viV1tq25DAMnpKKSJpPngtVa14";
+  apiKey = "AIzaSyCFyGzp7v1vitq250MMhpkK3JjpPngtVa14";
 }
 
 const baseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents`;
