@@ -529,47 +529,36 @@
       };
 
       // Initialize Firebase (Safely check if already initialized)
-      let defaultApp;
       if (firebase.apps.length === 0) {
-        defaultApp = firebase.initializeApp(firebaseConfig);
-      } else {
-        defaultApp = firebase.app();
+        firebase.initializeApp(firebaseConfig);
       }
-      const authInstance = firebase.auth();
+      var auth = firebase.auth();
+      console.log("Firebase initialized");
 
-      // Google Sign In Function
-      async function signInWithGoogle() {
+      // Google Sign In
+      function signInWithGoogle() {
+        console.log("Starting Google Sign In...");
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({
           prompt: 'select_account'
         });
-
-        try {
-          const result = await authInstance.signInWithPopup(provider);
-          console.log("User signed in:", result.user);
-          
-          // Get the Firebase ID token and store it so Express server can verify it
-          const idToken = await result.user.getIdToken();
-          localStorage.setItem('auth_token', idToken);
-
-          // Synchronize session state if the SPA body scripts are loaded
-          if (typeof checkAuthMe === 'function') {
-            await checkAuthMe();
-          }
-          if (typeof closeAuthModal === 'function') {
-            closeAuthModal();
-          }
-          if (typeof showView === 'function') {
-            showView('dashboard');
-            showToast('Authentication Successful', `Welcome, ${result.user.displayName || 'User'}!`);
-          } else {
-            // Fallback: window.location.href = "/dashboard.html";
-            window.location.href = "/dashboard.html"; // apna dashboard page
-          }
-        } catch (error) {
-          console.error("Sign in error:", error);
-          alert("Login failed: " + error.message);
-        }
+        auth.signInWithPopup(provider)
+          .then(async (result) => {
+            console.log("Login successful!", result.user);
+            
+            // Get the Firebase ID token and store it so Express server can verify it
+            const idToken = await result.user.getIdToken();
+            localStorage.setItem('auth_token', idToken);
+            
+            alert("Login successful! Welcome " + result.user.displayName);
+            
+            // Dashboard redirect
+            window.location.href = "/dashboard.html";
+          })
+          .catch((error) => {
+            console.error("Login error:", error);
+            alert("Login failed: " + error.message);
+          });
       }
     </script>
   </head>
@@ -1242,7 +1231,7 @@
       let selectedModifiers = new Set();
 
       // Firebase client global instance
-      let auth = (typeof authInstance !== 'undefined') ? authInstance : null;
+      auth = (typeof auth !== 'undefined') ? auth : null;
       let firebaseInitError = null;
 
       // Helper to load scripts dynamically
@@ -1893,44 +1882,8 @@
       }
 
       // --- Google Sign-In Handler ---
-      async function handleGoogleSignIn() {
-        authErrorMsg.classList.add('hidden');
-        if (!auth || firebaseInitError) {
-          showToast('Initialization Error', 'Firebase has not finished initializing or is blocked. Please refresh.');
-          return;
-        }
-
-        try {
-          authSubmitBtn.disabled = true;
-          authSubmitBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Connecting...`;
-          
-          const provider = new firebase.auth.GoogleAuthProvider();
-          provider.setCustomParameters({
-            prompt: 'select_account'
-          });
-          
-          const userCredential = await auth.signInWithPopup(provider);
-          if (userCredential.user) {
-            const idToken = await userCredential.user.getIdToken();
-            setSessionToken(idToken);
-            await checkAuthMe();
-            closeAuthModal();
-            showToast('Authentication Successful', `Welcome, ${userCredential.user.displayName || 'User'}!`);
-            showView('generator');
-          }
-        } catch (err) {
-          console.error("Firebase popup Sign-In failed:", err);
-          let userMessage = "Google Sign-In failed or was cancelled. If you see popup block alerts, please enable popups for this site.";
-          if (err.code === 'auth/popup-blocked') {
-            userMessage = "Google sign-in popup was blocked by your browser. Please allow popups for this domain and try again.";
-          }
-          authErrorMsg.textContent = userMessage;
-          authErrorMsg.classList.remove('hidden');
-          showToast('Google Sign-In Failed', err.message || 'Popup was closed or blocked.');
-        } finally {
-          authSubmitBtn.disabled = false;
-          authSubmitBtn.textContent = currentAuthTab === 'signup' ? 'Create Account' : 'Log In';
-        }
+      function handleGoogleSignIn() {
+        signInWithGoogle();
       }
 
       // --- Log Out Handler ---
@@ -2318,7 +2271,12 @@
       window.toggleMobileMenu = toggleMobileMenu;
 
       // Run profile loader and Firebase initialization on page start
-      initFirebase();
+      initFirebase().then(() => {
+        const path = window.location.pathname;
+        if (path.includes('dashboard.html') || path.includes('dashboard')) {
+          showView('dashboard');
+        }
+      });
     </script>
   </body>
 </html>
