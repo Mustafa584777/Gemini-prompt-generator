@@ -94,7 +94,33 @@ export async function getAuthenticatedUser(req: any): Promise<any | null> {
     return { email: customEmail };
   }
 
-  // 2. Decode standard Firebase JWT token (decode-only for maximum robustness in serverless environment)
+  // 2. Try official Google token verification using Identity Toolkit lookup API (most robust)
+  try {
+    const lookupUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`;
+    const lookupRes = await fetch(lookupUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken })
+    });
+    if (lookupRes.ok) {
+      const lookupData = await lookupRes.json();
+      if (lookupData.users && lookupData.users.length > 0) {
+        const lookupUser = lookupData.users[0];
+        console.log("server-firebase: getAuthenticatedUser: Securely verified standard Firebase ID token via Google API for:", lookupUser.email);
+        return {
+          email: lookupUser.email,
+          name: lookupUser.displayName || lookupUser.email.split("@")[0],
+          uid: lookupUser.localId
+        };
+      }
+    } else {
+      console.warn("server-firebase: getAuthenticatedUser: Google accounts:lookup returned status", lookupRes.status);
+    }
+  } catch (lookupErr) {
+    console.error("server-firebase: getAuthenticatedUser: Google accounts:lookup request failed:", lookupErr);
+  }
+
+  // 3. Fallback: Decode standard Firebase JWT token (decode-only for maximum robustness in serverless environment)
   try {
     const parts = idToken.split(".");
     if (parts.length === 3) {

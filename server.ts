@@ -44,7 +44,7 @@ async function getAuthenticatedUser(req: any) {
   
   // Get the token from authorization header to use in Firestore REST calls
   const authHeader = req.headers.authorization || req.headers.Authorization;
-  const idToken = authHeader && authHeader.toLowerCase().startsWith("bearer ") ? authHeader.substring(7) : undefined;
+  const idToken = authHeader && authHeader.toLowerCase().startsWith("bearer ") ? authHeader.substring(7).trim() : undefined;
 
   let profile = await firestoreDb.getUser(email, idToken);
   if (!profile) {

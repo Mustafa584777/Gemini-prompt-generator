@@ -2074,47 +2074,58 @@
         historyList.classList.remove('hidden');
         historyCountBadge.textContent = `${currentUser.promptHistory.length} prompt${currentUser.promptHistory.length > 1 ? 's' : ''}`;
         
-        historyList.innerHTML = currentUser.promptHistory.map(item => `
-          <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3 relative hover:border-zinc-700 transition-colors">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded text-[9px] font-bold text-indigo-400 uppercase tracking-wider font-mono">${item.style}</span>
-                <span class="text-[10px] text-zinc-500 font-mono">${formatTimestamp(item.timestamp)}</span>
+        historyList.innerHTML = currentUser.promptHistory.map((item, index) => {
+          const styleName = item.promptType || item.style || "Standard";
+          const instructionText = item.customInstructions || item.instructions || "";
+          const promptText = item.generatedPrompt || item.prompt || "";
+          const itemId = item.id || `hist-${index}`;
+          
+          return `
+            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3 relative hover:border-zinc-700 transition-colors">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded text-[9px] font-bold text-indigo-400 uppercase tracking-wider font-mono">${styleName}</span>
+                  <span class="text-[10px] text-zinc-500 font-mono">${formatTimestamp(item.timestamp)}</span>
+                </div>
+                <button onclick="copyHistoryPrompt('${itemId}', ${index})" class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-transparent border-0 cursor-pointer" id="copy-history-${itemId}">
+                  <i class="fa-solid fa-copy text-[10px]"></i> Copy
+                </button>
               </div>
-              <button onclick="copyHistoryPrompt('${item.id}')" class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-transparent border-0 cursor-pointer" id="copy-history-${item.id}">
-                <i class="fa-solid fa-copy text-[10px]"></i> Copy
-              </button>
-            </div>
-            
-            ${item.instructions ? `
-              <div class="text-xs text-zinc-500 font-mono italic">
-                <span class="text-zinc-600">Guideline:</span> ${item.instructions}
-              </div>
-            ` : ''}
+              
+              ${instructionText ? `
+                <div class="text-xs text-zinc-500 font-mono italic">
+                  <span class="text-zinc-600">Guideline:</span> ${instructionText}
+                </div>
+              ` : ''}
 
-            <p class="text-sm text-zinc-300 italic font-medium font-sans leading-relaxed">"${item.prompt}"</p>
-          </div>
-        `).join('');
+              <p class="text-sm text-zinc-300 italic font-medium font-sans leading-relaxed">"${promptText}"</p>
+            </div>
+          `;
+        }).join('');
       }
 
       // --- Copy prompt from history list ---
-      window.copyHistoryPrompt = async function(id) {
-        const item = currentUser.promptHistory.find(h => h.id === id);
+      window.copyHistoryPrompt = async function(id, index) {
+        if (!currentUser || !currentUser.promptHistory) return;
+        const item = currentUser.promptHistory[index] || currentUser.promptHistory.find(h => h.id === id);
         if (!item) return;
+        const promptText = item.generatedPrompt || item.prompt || "";
         
         try {
-          await navigator.clipboard.writeText(item.prompt);
+          await navigator.clipboard.writeText(promptText);
           const btn = document.getElementById(`copy-history-${id}`);
-          const originalHTML = btn.innerHTML;
-          btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i> Copied!`;
-          btn.classList.add('text-emerald-400');
-          btn.classList.remove('text-indigo-400');
-          
-          setTimeout(() => {
-            btn.innerHTML = originalHTML;
-            btn.classList.remove('text-emerald-400');
-            btn.classList.add('text-indigo-400');
-          }, 2000);
+          if (btn) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i> Copied!`;
+            btn.classList.add('text-emerald-400');
+            btn.classList.remove('text-indigo-400');
+            
+            setTimeout(() => {
+              btn.innerHTML = originalHTML;
+              btn.classList.remove('text-emerald-400');
+              btn.classList.add('text-indigo-400');
+            }, 2000);
+          }
         } catch(e) {
           showToast('Failed to copy', 'Clipboard write error.');
         }
