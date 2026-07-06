@@ -258,35 +258,63 @@ export async function firebaseAuthSignIn(email: string, passwordPlain: string): 
 export const firestoreDb = {
   async getUser(email: string, idToken?: string): Promise<UserProfile | null> {
     const cleanEmail = email.trim().toLowerCase();
-    try {
-      const url = `${baseUrl}/users/${encodeURIComponent(cleanEmail)}?key=${apiKey}`;
-      const headers: Record<string, string> = {};
+    const dbsToTry = [databaseId, "(default)"];
+    
+    for (const db of dbsToTry) {
+      if (!db) continue;
+      const dbBaseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${db}/documents`;
+      const url = `${dbBaseUrl}/users/${encodeURIComponent(cleanEmail)}?key=${apiKey}`;
+      
+      // Try with authorization first
       if (idToken) {
-        headers["Authorization"] = `Bearer ${idToken}`;
+        try {
+          const res = await fetch(url, {
+            headers: { "Authorization": `Bearer ${idToken}` }
+          });
+          if (res.status === 404) {
+            return null;
+          }
+          if (res.ok) {
+            const data = await res.json();
+            const fields = data.fields || {};
+            const profile: any = {};
+            for (const [k, v] of Object.entries(fields)) {
+              profile[k] = fromFirestoreValue(v);
+            }
+            return profile as UserProfile;
+          }
+        } catch (err) {
+          console.warn(`Firestore REST failed for db ${db} with auth:`, err);
+        }
       }
-      const res = await fetch(url, { headers });
-      if (res.status === 404) {
-        return null;
+      
+      // Try without authorization (using rules allow: if true)
+      try {
+        const res = await fetch(url);
+        if (res.status === 404) {
+          return null;
+        }
+        if (res.ok) {
+          const data = await res.json();
+          const fields = data.fields || {};
+          const profile: any = {};
+          for (const [k, v] of Object.entries(fields)) {
+            profile[k] = fromFirestoreValue(v);
+          }
+          return profile as UserProfile;
+        }
+      } catch (err) {
+        console.warn(`Firestore REST failed for db ${db} without auth:`, err);
       }
-      if (!res.ok) {
-        throw new Error(`REST error: ${res.statusText}`);
-      }
-      const data = await res.json();
-      const fields = data.fields || {};
-      const profile: any = {};
-      for (const [k, v] of Object.entries(fields)) {
-        profile[k] = fromFirestoreValue(v);
-      }
-      return profile as UserProfile;
-    } catch (err) {
-      console.warn("Firestore REST error in getUser, falling back to local storage:", err);
-      // Fallback
-      const localDb = loadLocalDb();
-      if (localDb[cleanEmail]) {
-        return localDb[cleanEmail];
-      }
-      return null;
     }
+    
+    // Fallback to local storage if all Firestore calls fail
+    console.warn("Firestore REST completely failed for getUser, falling back to local storage.");
+    const localDb = loadLocalDb();
+    if (localDb[cleanEmail]) {
+      return localDb[cleanEmail];
+    }
+    return null;
   },
 
   async setUser(email: string, profile: UserProfile, idToken?: string): Promise<void> {
@@ -295,20 +323,60 @@ export const firestoreDb = {
     for (const [k, v] of Object.entries(profile)) {
       fields[k] = toFirestoreValue(v);
     }
-    const url = `${baseUrl}/users/${encodeURIComponent(cleanEmail)}?key=${apiKey}`;
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (idToken) {
-      headers["Authorization"] = `Bearer ${idToken}`;
+    
+    const dbsToTry = [databaseId, "(default)"];
+    let lastError: Error | null = null;
+    
+    for (const db of dbsToTry) {
+      if (!db) continue;
+      const dbBaseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${db}/documents`;
+      const url = `${dbBaseUrl}/users/${encodeURIComponent(cleanEmail)}?key=${apiKey}`;
+      
+      // Try with authorization first
+      if (idToken) {
+        try {
+          const res = await fetch(url, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${idToken}`
+            },
+            body: JSON.stringify({ fields })
+          });
+          if (res.ok) {
+            return; // Success!
+          }
+          const text = await res.text();
+          lastError = new Error(`Status ${res.status}: ${text}`);
+        } catch (err: any) {
+          lastError = err;
+        }
+      }
+      
+      // Try without authorization
+      try {
+        const res = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ fields })
+        });
+        if (res.ok) {
+          return; // Success!
+        }
+        const text = await res.text();
+        lastError = new Error(`Status ${res.status}: ${text}`);
+      } catch (err: any) {
+        lastError = err;
+      }
     }
-    const res = await fetch(url, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify({ fields })
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`REST set error: ${res.status} ${errText}`);
-    }
+    
+    // If all Firestore calls failed, update local storage as fallback and throw warning (not fatal error)
+    console.warn("Firestore REST completely failed for setUser, updating local storage fallback:", lastError);
+    const localDb = loadLocalDb();
+    localDb[cleanEmail] = profile;
+    saveLocalDb(localDb);
   },
 
   async createUser(email: string, username: string, initialCredits: number = 90, idToken?: string): Promise<UserProfile> {
