@@ -550,10 +550,21 @@
             const idToken = await result.user.getIdToken();
             localStorage.setItem('auth_token', idToken);
             
-            alert("Login successful! Welcome " + result.user.displayName);
+            // Sync user state smoothly without hard reload if functions are loaded
+            if (typeof checkAuthMe === 'function') {
+              await checkAuthMe();
+            }
+            if (typeof closeAuthModal === 'function') {
+              closeAuthModal();
+            }
             
-            // Dashboard redirect
-            window.location.href = "/dashboard.html";
+            alert("Login successful! Welcome " + (result.user.displayName || 'User'));
+            
+            if (typeof showView === 'function') {
+              showView('dashboard');
+            } else {
+              window.location.href = "/dashboard.html";
+            }
           })
           .catch((error) => {
             console.error("Login error:", error);
@@ -1807,17 +1818,29 @@
           }
           auth = firebase.auth();
           
-          // Listen to firebase auth state changes
-          auth.onAuthStateChanged(async (user) => {
-            if (user) {
-              const idToken = await user.getIdToken();
-              setSessionToken(idToken);
-              await checkAuthMe();
-            } else {
-              setSessionToken(null);
-              currentUser = null;
-              updateUserUI();
-            }
+          // Listen to firebase auth state changes and wait for initial resolution
+          await new Promise((resolve) => {
+            let initialCheckDone = false;
+            auth.onAuthStateChanged(async (user) => {
+              try {
+                if (user) {
+                  const idToken = await user.getIdToken();
+                  setSessionToken(idToken);
+                  await checkAuthMe();
+                } else {
+                  setSessionToken(null);
+                  currentUser = null;
+                  updateUserUI();
+                }
+              } catch (e) {
+                console.error("Error in onAuthStateChanged handler:", e);
+              } finally {
+                if (!initialCheckDone) {
+                  initialCheckDone = true;
+                  resolve();
+                }
+              }
+            });
           });
         } catch (err) {
           console.error("Firebase initialization failed:", err);
