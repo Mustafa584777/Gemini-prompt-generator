@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
+    <!-- Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -22,33 +25,33 @@
       }
       
       :root {
-        --bg-main: #09090b;
-        --bg-card: rgba(24, 24, 27, 0.5);
-        --bg-inner: #18181b;
-        --border-color: rgba(39, 39, 42, 0.8);
-        --text-primary: #f4f4f5;
-        --text-secondary: #a1a1aa;
-        --text-muted: #71717a;
-        --accent: #128c7e;
-        --accent-hover: #25d366;
-        --accent-light: rgba(37, 211, 102, 0.1);
-        --emerald: #25d366;
+        --bg-main: #0c0a1c; /* Luxury deep amethyst black */
+        --bg-card: rgba(26, 21, 44, 0.55); /* Elegant translucent violet-tinted slate */
+        --bg-inner: #130f26; /* Deep violet-gray inner */
+        --border-color: rgba(139, 92, 246, 0.25); /* Bright, clean lavender border */
+        --text-primary: #f5f3ff; /* Crisp lavender-tinted white */
+        --text-secondary: #c084fc; /* Vibrant violet-lavender for accents */
+        --text-muted: #8b5cf6; /* Strong violet color */
+        --accent: #8b5cf6; /* Ultra luxury Royal Violet accent color */
+        --accent-hover: #a78bfa; /* Bright light lavender hover */
+        --accent-light: rgba(139, 92, 246, 0.12); /* Translucent premium violet halo */
+        --emerald: #a78bfa;
         --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         --font-mono: 'JetBrains Mono', monospace;
       }
 
       html.light-mode {
-        --bg-main: #f9fafb;
-        --bg-card: rgba(243, 244, 246, 0.65);
+        --bg-main: #f5f3ff; /* Clean light lavender background */
+        --bg-card: rgba(237, 233, 254, 0.65); /* Soft white-purple cards */
         --bg-inner: #ffffff;
-        --border-color: rgba(229, 231, 235, 0.9);
-        --text-primary: #111827;
-        --text-secondary: #4b5563;
-        --text-muted: #9ca3af;
-        --accent: #128c7e;
-        --accent-hover: #25d366;
-        --accent-light: rgba(37, 211, 102, 0.15);
-        --emerald: #25d366;
+        --border-color: rgba(124, 58, 237, 0.15);
+        --text-primary: #1e1b4b; /* Deep violet navy for strong readability */
+        --text-secondary: #6d28d9; /* Deep violet */
+        --text-muted: #7c3aed;
+        --accent: #7c3aed;
+        --accent-hover: #6d28d9;
+        --accent-light: rgba(124, 58, 237, 0.12);
+        --emerald: #7c3aed;
       }
 
       html.light-mode .bg-zinc-950,
@@ -107,7 +110,7 @@
       }
 
       html.light-mode .form-input:focus {
-        border-color: #128c7e !important;
+        border-color: var(--accent) !important;
       }
 
       html.light-mode select,
@@ -304,7 +307,7 @@
       .text-zinc-700 { color: #3f3f46; }
       .text-indigo-500 { color: #6366f1; }
       .text-indigo-400 { color: #818cf8; }
-      .text-emerald-400 { color: #34d399; }
+      .text-emerald-400 { color: var(--accent); }
       .text-rose-400 { color: #f87171; }
       
       /* Solid & Semi-transparent Background classes */
@@ -343,40 +346,40 @@
       .duration-200 { transition-duration: 200ms; }
       .duration-350 { transition-duration: 350ms; }
       
-      .hover\:bg-indigo-500:hover { background-color: #25d366; }
-      .hover\:bg-zinc-750:hover { background-color: #333336; }
-      .hover\:bg-zinc-700\/80:hover { background-color: rgba(63, 63, 70, 0.8); }
-      .hover\:text-zinc-100:hover { color: #f4f4f5; }
+      .hover\:bg-indigo-500:hover { background-color: var(--accent-hover); }
+      .hover\:bg-zinc-750:hover { background-color: rgba(139, 92, 246, 0.08); }
+      .hover\:bg-zinc-700\/80:hover { background-color: rgba(139, 92, 246, 0.12); }
+      .hover\:text-zinc-100:hover { color: #ffffff; }
       .hover\:scale-\[1\.02\]:hover { transform: scale(1.02); }
-      .hover\:border-indigo-500\/50:hover { border-color: rgba(37, 211, 102, 0.5); }
+      .hover\:border-indigo-500\/50:hover { border-color: var(--accent); }
       .hover\:text-white:hover { color: #ffffff; }
-      .hover\:text-zinc-200:hover { color: #e4e4e7; }
+      .hover\:text-zinc-200:hover { color: #ffffff; }
       .active\:scale-95:active { transform: scale(0.95); }
       
       /* Dynamic classes added & modified by Javascript */
       .bg-indigo-600 { background-color: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
       .text-white { color: #ffffff !important; }
       .border-indigo-600 { border-color: var(--accent) !important; }
-      .bg-zinc-800 { background-color: #27272a !important; color: #d4d4d8 !important; }
-      .text-zinc-300 { color: #d4d4d8 !important; }
+      .bg-zinc-800 { background-color: rgba(139, 92, 246, 0.08) !important; color: var(--text-primary) !important; border-color: var(--border-color) !important; }
+      .text-zinc-300 { color: var(--text-secondary) !important; }
       
-      .bg-indigo-950\/60 { background-color: rgba(37, 211, 102, 0.1) !important; color: #25d366 !important; border-color: rgba(37, 211, 102, 0.3) !important; }
-      .text-indigo-400 { color: #25d366 !important; }
-      .border-indigo-500\/50 { border-color: rgba(37, 211, 102, 0.3) !important; }
+      .bg-indigo-950\/60 { background-color: var(--accent-light) !important; color: var(--accent) !important; border-color: var(--border-color) !important; }
+      .text-indigo-400 { color: var(--accent) !important; }
+      .border-indigo-500\/50 { border-color: var(--border-color) !important; }
       
-      .bg-zinc-800\/60 { background-color: rgba(39, 39, 42, 0.6) !important; color: #a1a1aa !important; border-color: #27272a !important; }
-      .text-zinc-400 { color: #a1a1aa !important; }
-      .border-zinc-800 { border-color: #27272a !important; }
+      .bg-zinc-800\/60 { background-color: rgba(26, 21, 44, 0.4) !important; color: var(--text-secondary) !important; border-color: var(--border-color) !important; }
+      .text-zinc-400 { color: var(--text-secondary) !important; }
+      .border-zinc-800 { border-color: var(--border-color) !important; }
       
       /* Loading & State badges toggled by JS */
-      .bg-indigo-950 { background-color: rgba(18, 140, 126, 0.15) !important; border-color: rgba(37, 211, 102, 0.3) !important; color: #25d366 !important; }
-      .border-indigo-900 { border-color: rgba(18, 140, 126, 0.4) !important; }
-      .bg-emerald-950 { background-color: rgba(6, 78, 59, 0.8) !important; border-color: rgba(37, 211, 102, 0.3) !important; color: #25d366 !important; }
-      .border-emerald-900 { border-color: rgba(6, 95, 70, 0.8) !important; }
+      .bg-indigo-950 { background-color: var(--accent-light) !important; border-color: var(--border-color) !important; color: var(--accent) !important; }
+      .border-indigo-900 { border-color: var(--border-color) !important; }
+      .bg-emerald-950 { background-color: var(--accent-light) !important; border-color: var(--border-color) !important; color: var(--accent) !important; }
+      .border-emerald-900 { border-color: var(--border-color) !important; }
       
       /* Button Copy States */
-      .bg-emerald-600 { background-color: #059669 !important; }
-      .hover\:bg-emerald-500:hover { background-color: #10b981 !important; }
+      .bg-emerald-600 { background-color: #6d28d9 !important; }
+      .hover\:bg-emerald-500:hover { background-color: #7c3aed !important; }
 
       /* Animation keyframes */
       .animate-spin {
@@ -400,7 +403,7 @@
       .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
       .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
       .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
-      .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+      .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.15); }
       .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
       
       /* Helpful Classes */
@@ -426,14 +429,14 @@
       }
       .nav-link:hover {
         color: var(--text-primary);
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: var(--accent-light);
       }
        .nav-link.active {
-        background-color: rgba(37, 211, 102, 0.15);
-        color: #25d366 !important;
+        background-color: var(--accent-light);
+        color: var(--accent) !important;
       }
 
-      /* Global Icon & Support rules for WhatsApp green standardization */
+      /* Global Icon & Support rules for Violet shades standardization */
       header i,
       main i,
       footer i,
@@ -444,7 +447,7 @@
       #output-container i,
       #view-dashboard i,
       #view-pricing i {
-        color: #25d366 !important;
+        color: var(--accent) !important;
       }
       button.bg-indigo-600 i,
       button.bg-emerald-600 i,
@@ -463,7 +466,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: rgba(9, 9, 11, 0.85);
+        background-color: rgba(12, 10, 28, 0.85);
         backdrop-filter: blur(8px);
         z-index: 100;
         display: flex;
@@ -472,8 +475,8 @@
         padding: 1rem;
       }
       .modal-content {
-        background-color: #18181b;
-        border: 1px solid rgba(63, 63, 70, 0.8);
+        background-color: var(--bg-inner);
+        border: 1px solid var(--border-color);
         border-radius: 1.5rem;
         width: 100%;
         max-width: 440px;
@@ -489,22 +492,22 @@
       /* Form inputs */
       .form-input {
         width: 100%;
-        background-color: #09090b;
-        border: 1px solid #27272a;
+        background-color: rgba(12, 10, 28, 0.5);
+        border: 1px solid var(--border-color);
         border-radius: 0.75rem;
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
-        color: #f4f4f5;
+        color: var(--text-primary);
         outline: none;
         transition: border-color 0.2s;
       }
       .form-input:focus {
-        border-color: #25d366;
+        border-color: var(--accent);
       }
 
       /* Pricing Card badge */
       .popular-badge {
-        background: linear-gradient(135deg, #128c7e, #25d366);
+        background: linear-gradient(135deg, #7c3aed, #c084fc);
         color: #ffffff;
         font-size: 0.65rem;
         font-weight: 700;
@@ -514,76 +517,6 @@
         letter-spacing: 0.05em;
       }
     </style>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-    <script>
-      // Firebase Config
-      const firebaseConfig = {
-        apiKey: "AIzaSyCFyGzp7viV1tq25DAMnpKKSJpPngtVa14",
-        authDomain: "gen-lang-client-0844549707.firebaseapp.com",
-        projectId: "gen-lang-client-0844549707",
-        storageBucket: "gen-lang-client-0844549707.firebasestorage.app",
-        messagingSenderId: "845800015860",
-        appId: "1:845800015860:web:a6229be704605991785ba1"
-      };
-
-      // Initialize Firebase (Safely check if already initialized)
-      if (firebase.apps.length === 0) {
-        firebase.initializeApp(firebaseConfig);
-      }
-      var auth = firebase.auth();
-      console.log("Firebase initialized");
-
-      // Google Sign In
-      function signInWithGoogle() {
-        console.log("Starting Google Sign In...");
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({
-          prompt: 'select_account'
-        });
-        auth.signInWithPopup(provider)
-          .then(async (result) => {
-            console.log("Login successful!", result.user);
-            
-            // Get the Firebase ID token and store it so Express server can verify it
-            const idToken = await result.user.getIdToken();
-            localStorage.setItem('auth_token', idToken);
-            
-            // Sync user state smoothly without hard reload if functions are loaded
-            if (typeof checkAuthMe === 'function') {
-              await checkAuthMe();
-            }
-            if (typeof closeAuthModal === 'function') {
-              closeAuthModal();
-            }
-            
-            // Seamlessly display beautiful status notifications and route views
-            if (typeof showToast === 'function') {
-              showToast("Login successful!", "Welcome back, " + (result.user.displayName || result.user.email.split('@')[0]) + "!");
-            }
-            
-            if (typeof showView === 'function') {
-              showView('dashboard');
-              try {
-                window.history.pushState({}, '', '#dashboard');
-              } catch (e) {
-                console.warn("History pushState blocked/failed:", e);
-              }
-            } else {
-              window.location.hash = "dashboard";
-            }
-          })
-          .catch((error) => {
-            console.error("Login error:", error);
-            if (typeof showToast === 'function') {
-              showToast("Login failed", error.message);
-            } else {
-              alert("Login failed: " + error.message);
-            }
-          });
-      }
-    </script>
   </head>
   <body class="font-sans antialiased text-zinc-100 min-h-screen flex flex-col bg-zinc-950">
     <!-- Navigation Bar / Header -->
@@ -594,7 +527,7 @@
           <img src="https://geminipromptgenerator.online/blog/wp-content/uploads/2026/07/logo-2.webp" alt="Logo" class="h-10 w-auto object-contain" referrerPolicy="no-referrer" />
           <div class="hidden sm:block">
             <h1 class="text-base font-bold tracking-tight text-zinc-100 uppercase">
-              Gemini<span style="color: #25d366 !important;">Prompt</span>
+              Gemini<span style="color: var(--accent) !important;">Prompt</span>
             </h1>
             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold">Prompt Generator v3.5</p>
           </div>
@@ -712,13 +645,13 @@
                 </span>
                 <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400">Source Image Workspace</h2>
               </div>
-              <span id="image-status-badge" class="hidden text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                Image Ready
+              <span id="image-status-badge" class="hidden text-\[10px\] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-emerald-500\/10 text-emerald-400 border border-emerald-500\/20">
+                Ready to crop
               </span>
             </div>
 
             <!-- Drag and Drop Zone -->
-            <div id="drop-zone" class="border border-dashed border-zinc-800 hover:border-indigo-500/50 bg-zinc-900/20 rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[380px] flex-grow">
+            <div id="drop-zone" class="border border-dashed border-zinc-800 hover:border-indigo-500\/50 bg-zinc-900\/20 rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-\[380px\] flex-grow">
               <input type="file" id="file-input" class="hidden" accept="image/*" />
               <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-2xl shadow-inner mb-4 text-zinc-500">
                 <i data-lucide="upload-cloud" class="w-10 h-10 text-indigo-500"></i>
@@ -730,17 +663,61 @@
               </button>
             </div>
 
-            <!-- Image Workspace Container (Hidden until image is loaded) -->
+            <!-- Cropper Workspace Container (Hidden until image is loaded) -->
             <div id="cropper-workspace" class="hidden flex flex-col gap-4 flex-grow">
-              <div class="rounded-2xl overflow-hidden relative border border-zinc-800 flex items-center justify-center min-h-[350px] max-h-[480px] bg-zinc-950/40">
-                <img id="cropper-image" src="" alt="Source Image" class="max-w-full max-h-[480px] object-contain rounded-xl p-2" />
+              <div class="cropper-container-wrapper rounded-2xl overflow-hidden relative border border-zinc-800 flex items-center justify-center min-h-\[350px\] max-h-\[480px\]">
+                <img id="cropper-image" src="" alt="Source Image for cropping" class="max-w-full max-h-\[480px\]" />
               </div>
 
-              <!-- Action Toolbar (Swap Image Only) -->
-              <div class="flex items-center justify-end gap-3 pt-1">
-                <button type="button" id="change-image-btn" class="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700 transition-all cursor-pointer">
-                  Swap Image
-                </button>
+              <!-- Aspect Ratio Preset Controls -->
+              <div class="flex flex-col gap-2 bg-zinc-900\/80 p-4 rounded-2xl border border-zinc-800\/60">
+                <span class="text-\[10px\] font-bold uppercase tracking-widest text-zinc-500">Aspect Ratio Selector</span>
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                  <button type="button" data-aspect-ratio="NaN" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                    Free Form
+                  </button>
+                  <button type="button" data-aspect-ratio="1" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                    1:1 Sq
+                  </button>
+                  <button type="button" data-aspect-ratio="1.3333" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                    4:3 Photo
+                  </button>
+                  <button type="button" data-aspect-ratio="1.7777" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                    16:9 Cinematic
+                  </button>
+                  <button type="button" data-aspect-ratio="0.5625" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                    9:16 Portrait
+                  </button>
+                </div>
+              </div>
+
+              <!-- Fine-Tuning Controls toolbar -->
+              <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <div class="flex items-center gap-1.5 bg-zinc-900\/60 p-1 rounded-xl border border-zinc-800\/60">
+                  <button type="button" id="rotate-left" title="Rotate Left 90°" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                  </button>
+                  <button type="button" id="rotate-right" title="Rotate Right 90°" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
+                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                  </button>
+                  <div class="h-5 w-\[1px\] bg-zinc-800 mx-1"></div>
+                  <button type="button" id="flip-h" title="Flip Horizontal" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
+                    <i data-lucide="flip-horizontal" class="w-4 h-4"></i>
+                  </button>
+                  <button type="button" id="flip-v" title="Flip Vertical" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
+                    <i data-lucide="flip-vertical" class="w-4 h-4"></i>
+                  </button>
+                  <div class="h-5 w-\[1px\] bg-zinc-800 mx-1"></div>
+                  <button type="button" id="reset-crop" title="Reset Image to Default" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 rounded-lg transition-colors">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+                <div>
+                  <button type="button" id="change-image-btn" class="px-4 py-2.5 bg-zinc-800\/80 hover:bg-zinc-700\/80 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700\/60 transition-all">
+                    Swap Image
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -749,19 +726,12 @@
           <div class="lg:col-span-5 flex flex-col gap-6">
             
             <!-- Generator Parameters Panel -->
-            <div class="bg-zinc-900/50 border border-zinc-800/80 rounded-[2rem] p-6 shadow-xl flex flex-col gap-4 relative overflow-hidden">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="p-1.5 bg-zinc-800 rounded-lg text-indigo-400 flex items-center justify-center">
-                    <i data-lucide="sliders" class="w-4 h-4"></i>
-                  </span>
-                  <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400">Generator Configuration</h2>
-                </div>
-                <div class="flex items-center gap-1.5 bg-zinc-950/40 px-2.5 py-1 rounded-xl border border-zinc-800">
-                  <i class="fa-solid fa-coins text-[10px] text-emerald-500"></i>
-                  <span id="generator-credits-display" class="text-xs font-mono font-bold text-emerald-400">60</span>
-                  <span class="text-[9px] text-zinc-500 font-bold uppercase">creds</span>
-                </div>
+            <div class="bg-zinc-900\/50 border border-zinc-800\/80 rounded-\[2rem\] p-6 shadow-xl flex flex-col gap-4 relative overflow-hidden">
+              <div class="flex items-center gap-2">
+                <span class="p-1.5 bg-zinc-800 rounded-lg text-indigo-400 flex items-center justify-center">
+                  <i data-lucide="sliders" class="w-4 h-4"></i>
+                </span>
+                <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400">Generator Configuration</h2>
               </div>
 
               <!-- Prompt Style Selection -->
@@ -886,22 +856,22 @@
           <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between gap-6 relative overflow-hidden shadow-lg">
             <div class="flex flex-col gap-4">
               <div>
-                <h3 class="text-zinc-400 text-xs font-bold uppercase tracking-widest">Free Guest Pack</h3>
+                <h3 class="text-zinc-400 text-xs font-bold uppercase tracking-widest">Free Trial Pack</h3>
                 <div class="flex items-baseline gap-1 mt-2">
                   <span class="text-4xl font-extrabold text-white">$0</span>
                   <span class="text-zinc-500 text-xs font-medium">Starter</span>
                 </div>
               </div>
-              <p class="text-zinc-400 text-xs">Test the vision analysis tools with free guest credits immediately.</p>
+              <p class="text-zinc-400 text-xs">Test the vision analysis tools with free initial credits upon signup.</p>
               <div class="h-[1px] bg-zinc-800 my-1"></div>
               <ul class="flex flex-col gap-3 text-xs text-zinc-300">
-                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> 60 Free Guest Credits</li>
-                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> No Sign Up Required</li>
+                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> 3 Free Account Credits</li>
+                <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Full Aspect Ratio Presets</li>
                 <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> Standard GPU Processing</li>
               </ul>
             </div>
-            <button onclick="showView('generator')" class="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700 transition-all cursor-pointer">
-              Use Guest Credits
+            <button onclick="handleFreeStarterSignup()" class="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700 transition-all cursor-pointer">
+              Sign Up For Free
             </button>
           </div>
 
@@ -927,7 +897,7 @@
                 <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> High-Priority Server Pipeline</li>
               </ul>
             </div>
-            <button onclick="startRazorpayCheckout(5, 50, 'USD')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-95 cursor-pointer">
+            <button onclick="startCheckout(5, 50)" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-95 cursor-pointer">
               Buy 50 Credits Now
             </button>
           </div>
@@ -951,12 +921,11 @@
                 <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-indigo-400"></i> API Endpoint Direct Integration</li>
               </ul>
             </div>
-            <button onclick="startRazorpayCheckout(12, 150, 'USD')" class="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700 transition-all cursor-pointer">
+            <button onclick="startCheckout(12, 150)" class="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700 transition-all cursor-pointer">
               Buy 150 Credits
             </button>
           </div>
         </div>
-
       </div>
 
       <!-- VIEW: DASHBOARD -->
@@ -1031,135 +1000,93 @@
 
     </main>
 
-    <!-- AUTH MODAL (Google Sign-In Only) -->
+    <!-- AUTH MODAL (Login / Signup) -->
     <div id="auth-modal" class="hidden modal-backdrop">
-      <div class="modal-content border border-zinc-800 p-6 flex flex-col gap-6">
-        
-        <!-- Header / Presentation -->
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-indigo-950 text-indigo-400 rounded-2xl flex items-center justify-center text-xl shadow-inner border border-indigo-900/50">
-            <i class="fa-solid fa-user-shield text-indigo-400 animate-pulse"></i>
+      <div class="modal-content border border-zinc-800">
+        <!-- Tab Switches -->
+        <div class="flex border-b border-zinc-800 bg-zinc-900/60">
+          <button id="auth-tab-login" onclick="switchAuthTab('login')" class="flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-indigo-500 text-white cursor-pointer">
+            Log In
+          </button>
+          <button id="auth-tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 cursor-pointer">
+            Sign Up
+          </button>
+        </div>
+
+        <!-- Form content -->
+        <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="p-6 flex flex-col gap-4">
+          <!-- Username field (only in signup) -->
+          <div id="auth-field-username" class="hidden flex flex-col gap-1.5">
+            <label for="auth-input-username" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Username</label>
+            <input type="text" id="auth-input-username" placeholder="e.g. prompt_wizard" class="form-input" />
           </div>
-          <div>
-            <h3 class="text-base font-bold text-white uppercase tracking-tight">Secure Sign In</h3>
-            <p class="text-indigo-400 text-[10px] uppercase tracking-widest font-bold">Google Auth Enabled</p>
+
+          <div class="flex flex-col gap-1.5">
+            <label for="auth-input-email" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Email Address</label>
+            <input type="email" id="auth-input-email" required placeholder="name@example.com" class="form-input" />
           </div>
-        </div>
 
-        <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 flex flex-col gap-2.5">
-          <p class="text-xs text-zinc-300 leading-relaxed">
-            Create an account or log in instantly using your Google Account to claim 90 FREE credits and securely track your prompt generation history.
-          </p>
-        </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="auth-input-password" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Password</label>
+            <input type="password" id="auth-input-password" required placeholder="••••••••" class="form-input" />
+          </div>
 
-        <!-- Google Sign-In Button (Visible) -->
-        <button type="button" onclick="handleGoogleSignIn()" class="w-full py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98]">
-          <i class="fa-brands fa-google text-red-500" style="color: #ea4335 !important;"></i>
-          <span>Continue with Google Account</span>
-        </button>
+          <div id="auth-error-msg" class="text-xs text-rose-400 font-medium hidden"></div>
 
-        <button type="button" onclick="closeAuthModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer">
-          Cancel
-        </button>
+          <button type="submit" id="auth-submit-btn" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all mt-2 cursor-pointer active:scale-95">
+            Proceed
+          </button>
 
-        <!-- Hidden Legacy Auth Form and Tab Buttons to avoid breaking JS scripts -->
-        <div class="hidden">
-          <button id="auth-tab-login"></button>
-          <button id="auth-tab-signup"></button>
-          <form id="auth-form" onsubmit="event.preventDefault()">
-            <div id="auth-field-username">
-              <input type="text" id="auth-input-username" />
-            </div>
-            <input type="email" id="auth-input-email" />
-            <input type="password" id="auth-input-password" />
-            <button type="submit" id="auth-submit-btn">Proceed</button>
-          </form>
-        </div>
-        <div id="auth-error-msg" class="text-xs text-rose-400 font-medium hidden"></div>
+          <button type="button" onclick="closeAuthModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all mt-1 cursor-pointer">
+            Cancel
+          </button>
+        </form>
       </div>
     </div>
 
-    <!-- SANDBOX CHECKOUT MODAL -->
-    <div id="sandbox-checkout-modal" class="hidden modal-backdrop">
+    <!-- CHECKOUT SIMULATOR MODAL -->
+    <div id="checkout-modal" class="hidden modal-backdrop">
       <div class="modal-content border border-zinc-800">
         <div class="p-6 flex flex-col gap-5">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-emerald-950 text-emerald-400 rounded-2xl flex items-center justify-center text-xl shadow-inner border border-emerald-900/30">
-              <i class="fa-solid fa-flask"></i>
+            <div class="w-12 h-12 bg-indigo-950 text-indigo-400 rounded-2xl flex items-center justify-center text-xl shadow-inner border border-indigo-900/50">
+              <i class="fa-solid fa-credit-card"></i>
             </div>
             <div>
-              <h3 class="text-base font-bold text-white uppercase tracking-tight">Razorpay Sandbox</h3>
-              <p class="text-emerald-400 text-[10px] uppercase tracking-widest font-bold">Simulator Active</p>
+              <h3 class="text-base font-bold text-white uppercase tracking-tight">Checkout Simulation</h3>
+              <p class="text-zinc-500 text-[10px] uppercase tracking-widest">Instant Credits Delivery</p>
             </div>
           </div>
 
           <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 flex flex-col gap-2.5">
             <div class="flex justify-between items-center text-xs">
-              <span class="text-zinc-500">Item:</span>
-              <span id="sandbox-item-title" class="text-white font-semibold">50 Credits Pack</span>
+              <span class="text-zinc-400">Item:</span>
+              <span id="checkout-item-title" class="text-white font-semibold">50 Credits Pack</span>
             </div>
             <div class="flex justify-between items-center text-xs">
-              <span class="text-zinc-500">Price:</span>
-              <span id="sandbox-item-price" class="text-emerald-400 font-bold">$5.00</span>
-            </div>
-            <div class="h-[1px] bg-zinc-800/60 my-1"></div>
-            <p class="text-[11px] text-zinc-400 leading-relaxed">
-              Your public and private Razorpay API keys are not configured in your Environment Secrets. The simulator will verify the payment flow and credit your account.
-            </p>
-            <div class="p-3 bg-indigo-950/40 border border-indigo-900/30 rounded-xl text-[10px] text-indigo-300 leading-relaxed flex flex-col gap-1">
-              <span class="font-bold text-indigo-200">How to use your own Razorpay keys:</span>
-              <span>1. Go to Razorpay Dashboard &gt; Settings &gt; API Keys</span>
-              <span>2. Generate your Key ID and Key Secret</span>
-              <span>3. Add them in AI Studio Settings Secrets: <code class="bg-zinc-900 px-1 py-0.5 rounded text-white font-mono">RAZORPAY_KEY_ID</code> and <code class="bg-zinc-900 px-1 py-0.5 rounded text-white font-mono">RAZORPAY_KEY_SECRET</code></span>
+              <span class="text-zinc-400">Total Price:</span>
+              <span id="checkout-item-price" class="text-emerald-400 font-bold">$5.00</span>
             </div>
           </div>
 
-          <button id="sandbox-pay-btn" onclick="executeSandboxCheckout()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
-            <i class="fa-solid fa-circle-check text-xs"></i>
-            <span>Simulate Successful Payment</span>
+          <!-- Credit Card Input Simulation -->
+          <div class="flex flex-col gap-3">
+            <label class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Simulated Payment Card</label>
+            <div class="relative">
+              <input type="text" readonly value="•••• •••• •••• 4242" class="form-input pr-10 text-zinc-400" />
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 text-sm">
+                <i class="fa-brands fa-cc-visa"></i>
+              </div>
+            </div>
+          </div>
+
+          <button id="checkout-pay-btn" onclick="executeCheckout()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-lock text-xs"></i>
+            <span>Confirm Simulated Payment</span>
           </button>
 
-          <button type="button" onclick="closeSandboxCheckoutModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer">
+          <button type="button" onclick="closeCheckoutModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer">
             Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRICING POPUP MODAL -->
-    <div id="pricing-popup-modal" class="hidden modal-backdrop">
-      <div class="modal-content border border-zinc-800 p-6 flex flex-col gap-6">
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-indigo-950 text-indigo-400 rounded-2xl flex items-center justify-center text-xl shadow-inner border border-indigo-900/50">
-            <i class="fa-solid fa-bolt text-emerald-500 animate-pulse"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-white uppercase tracking-tight">Credits Exhausted</h3>
-            <p class="text-zinc-500 text-[10px] uppercase tracking-widest">Upgrade to Continue</p>
-          </div>
-        </div>
-
-        <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 flex flex-col gap-2.5">
-          <p class="text-xs text-zinc-300 leading-relaxed">
-            Each high-density vision analysis costs <strong class="text-white">30 credits</strong>. You have used all of your free guest credits.
-          </p>
-          <div class="h-[1px] bg-zinc-800 my-1"></div>
-          <p class="text-xs text-emerald-400 font-semibold flex items-center gap-2">
-            <i class="fa-solid fa-gift"></i> Log in or Sign up now to claim 90 FREE credits!
-          </p>
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <button onclick="openAuthModalFromPopup('login')" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
-            <i class="fa-solid fa-right-to-bracket text-xs"></i>
-            <span>Log In to Get 90 Credits</span>
-          </button>
-          <button onclick="openAuthModalFromPopup('signup')" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
-            <i class="fa-solid fa-user-plus text-xs"></i>
-            <span>Create Free Account</span>
-          </button>
-          <button type="button" onclick="closePricingPopupModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer">
-            Close
           </button>
         </div>
       </div>
@@ -1187,7 +1114,7 @@
           <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3 cursor-pointer" onclick="showView('generator')">
               <img src="https://geminipromptgenerator.online/blog/wp-content/uploads/2026/07/logo-2.webp" alt="Logo" class="h-8 w-auto object-contain" referrerPolicy="no-referrer" />
-              <span class="text-sm font-bold text-white uppercase tracking-tight">Gemini<span style="color: #25d366 !important;">Prompt</span></span>
+              <span class="text-sm font-bold text-white uppercase tracking-tight">Gemini<span style="color: var(--accent) !important;">Prompt</span></span>
             </div>
             <p class="text-zinc-500 text-xs leading-relaxed">
               Synthesize production-grade text-to-image prompt code directly from high-density computer vision analysis models.
@@ -1238,11 +1165,8 @@
 
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Razorpay Checkout SDK -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <!-- Firebase Compat SDKs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.js"></script>
+    <!-- Cropper.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 
     <script>
       // Initialize vector icons
@@ -1251,23 +1175,8 @@
       // State Management
       let originalImageBase64 = null;
       let originalMimeType = null;
+      let cropperInstance = null;
       let selectedModifiers = new Set();
-
-      // Firebase client global instance
-      auth = (typeof auth !== 'undefined') ? auth : null;
-      let firebaseInitError = null;
-
-      // Helper to load scripts dynamically
-      async function loadScript(url) {
-        return new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = url;
-          script.async = true;
-          script.onload = () => resolve();
-          script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
-          document.head.appendChild(script);
-        });
-      }
 
       // User & Navigation State
       let currentUser = null;
@@ -1282,6 +1191,14 @@
       const cropperImage = document.getElementById('cropper-image');
       const imageStatusBadge = document.getElementById('image-status-badge');
       const changeImageBtn = document.getElementById('change-image-btn');
+
+      // Cropper Control Buttons
+      const rotateLeftBtn = document.getElementById('rotate-left');
+      const rotateRightBtn = document.getElementById('rotate-right');
+      const flipHBtn = document.getElementById('flip-h');
+      const flipVBtn = document.getElementById('flip-v');
+      const resetCropBtn = document.getElementById('reset-crop');
+      const ratioButtons = document.querySelectorAll('.ratio-btn');
 
       // Generation Inputs
       const promptStyleSelect = document.getElementById('prompt-style');
@@ -1378,6 +1295,11 @@
       });
 
       changeImageBtn.addEventListener('click', () => {
+        // Destroy existing cropper instance
+        if (cropperInstance) {
+          cropperInstance.destroy();
+          cropperInstance = null;
+        }
         // Reset states
         originalImageBase64 = null;
         originalMimeType = null;
@@ -1393,7 +1315,7 @@
         fileInput.value = "";
       });
 
-      // --- File Reading and Image Workspace Setup ---
+      // --- File Reading and Cropper Setup ---
       function handleSelectedFile(file) {
         if (!file.type.startsWith('image/')) {
           showToast('Unsupported format', 'Please select a valid image file.');
@@ -1406,7 +1328,7 @@
         reader.onload = (e) => {
           originalImageBase64 = e.target.result;
           
-          // Show the image workspace
+          // Show the cropper workspace
           dropZone.classList.add('hidden');
           cropperWorkspace.classList.remove('hidden');
           imageStatusBadge.classList.remove('hidden');
@@ -1414,11 +1336,100 @@
           // Setup Image
           cropperImage.src = originalImageBase64;
           
-          // Done loading
-          updateGenerateButtonState();
+          // Destroy old cropper if any
+          if (cropperInstance) {
+            cropperInstance.destroy();
+          }
+
+          // Initialize Cropper.js
+          setTimeout(() => {
+            cropperInstance = new Cropper(cropperImage, {
+              viewMode: 1,
+              dragMode: 'move',
+              autoCropArea: 0.9,
+              restore: false,
+              guides: true,
+              center: true,
+              highlight: false,
+              cropBoxMovable: true,
+              cropBoxResizable: true,
+              toggleDragModeOnDblclick: false,
+              ready() {
+                // Done loading
+                updateGenerateButtonState();
+              }
+            });
+          }, 50);
         };
         reader.readAsDataURL(file);
       }
+
+      // --- Cropper Control Handlers ---
+      rotateLeftBtn.addEventListener('click', () => {
+        if (cropperInstance) cropperInstance.rotate(-90);
+      });
+
+      rotateRightBtn.addEventListener('click', () => {
+        if (cropperInstance) cropperInstance.rotate(90);
+      });
+
+      let isFlippedH = false;
+      flipHBtn.addEventListener('click', () => {
+        if (cropperInstance) {
+          isFlippedH = !isFlippedH;
+          cropperInstance.scaleX(isFlippedH ? -1 : 1);
+        }
+      });
+
+      let isFlippedV = false;
+      flipVBtn.addEventListener('click', () => {
+        if (cropperInstance) {
+          isFlippedV = !isFlippedV;
+          cropperInstance.scaleY(isFlippedV ? -1 : 1);
+        }
+      });
+
+      resetCropBtn.addEventListener('click', () => {
+        if (cropperInstance) {
+          cropperInstance.reset();
+          isFlippedH = false;
+          isFlippedV = false;
+          cropperInstance.scale(1, 1);
+          
+          // Reset ratio button styling
+          ratioButtons.forEach(btn => {
+            btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+            btn.classList.add('bg-zinc-800', 'text-zinc-300');
+          });
+          ratioButtons[0].classList.remove('bg-zinc-800', 'text-zinc-300');
+          ratioButtons[0].classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+          cropperInstance.setAspectRatio(NaN);
+        }
+      });
+
+      // Aspect Ratio Selectors Click
+      ratioButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          if (!cropperInstance) return;
+
+          // Remove active styles from all
+          ratioButtons.forEach(btn => {
+            btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+            btn.classList.add('bg-zinc-800', 'text-zinc-300');
+          });
+
+          // Add active styles to clicked
+          button.classList.remove('bg-zinc-800', 'text-zinc-300');
+          button.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+
+          const ratioValue = parseFloat(button.getAttribute('data-aspect-ratio'));
+          cropperInstance.setAspectRatio(isNaN(ratioValue) ? NaN : ratioValue);
+        });
+      });
+
+      // Style active Free Form ratio by default on load
+      ratioButtons[0].classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+      ratioButtons[0].classList.remove('bg-zinc-800', 'text-zinc-300');
 
       // --- Modifiers Selection ---
       modifierButtons.forEach(btn => {
@@ -1510,25 +1521,20 @@
       async function generatePrompt() {
         if (!originalImageBase64) return;
 
-        // Perform Credit Check
-        if (currentUser) {
-          if (currentUser.credits < 30) {
-            openPricingPopupModal();
-            return;
-          }
-        } else {
-          const anonCredits = getAnonymousCredits();
-          if (anonCredits < 30) {
-            openPricingPopupModal();
-            return;
-          }
-        }
-
         // Visual state: Loading
         setLoadingState(true);
 
         try {
+          // Extract the cropped canvas image as jpeg (compressed for API transfer speed)
           let finalBase64Image = originalImageBase64;
+          if (cropperInstance) {
+            finalBase64Image = cropperInstance.getCroppedCanvas({
+              maxWidth: 1200, // Optimize size for rapid Gemini API response times
+              maxHeight: 1200,
+              imageSmoothingEnabled: true,
+              imageSmoothingQuality: 'high',
+            }).toDataURL('image/jpeg', 0.85);
+          }
 
           let response;
           const headers = {
@@ -1540,19 +1546,18 @@
           }
 
           try {
-            const apiEndpoint = getApiUrl('/api/generate-prompt');
-            response = await fetch(apiEndpoint, {
+            response = await fetch('/api/generate-prompt', {
               method: 'POST',
               headers: headers,
               body: JSON.stringify({
                 image: finalBase64Image,
-                mimeType: originalMimeType || 'image/jpeg',
+                mimeType: 'image/jpeg',
                 promptType: promptStyleSelect.value,
                 customInstructions: customInstructionsInput.value
               })
             });
 
-            if (response.status === 404 && apiEndpoint.startsWith('/api/')) {
+            if (response.status === 404) {
               console.warn("Relative API returned 404, attempting live Vercel fallback...");
               throw new Error("API_404");
             }
@@ -1570,7 +1575,7 @@
                 headers: fallbackHeaders,
                 body: JSON.stringify({
                   image: finalBase64Image,
-                  mimeType: originalMimeType || 'image/jpeg',
+                  mimeType: 'image/jpeg',
                   promptType: promptStyleSelect.value,
                   customInstructions: customInstructionsInput.value
                 })
@@ -1583,7 +1588,8 @@
           if (!response.ok) {
             const errData = await response.json();
             if (response.status === 403 || errData.error === 'credits_exhausted') {
-              openPricingPopupModal();
+              showToast('Credits Exhausted', 'You have used all your free uses. Please upgrade starting from $5 to get 50 credits.');
+              showView('pricing');
               setLoadingState(false);
               return;
             }
@@ -1596,11 +1602,6 @@
           if (currentUser && typeof data.credits === 'number') {
             currentUser.credits = data.credits;
             checkAuthMe(); // Refresh prompt history and credits dynamically
-          } else if (!currentUser) {
-            // Deduct 30 credits locally for guest
-            const currentAnon = getAnonymousCredits();
-            const nextAnon = Math.max(0, currentAnon - 30);
-            setAnonymousCredits(nextAnon);
           }
 
         } catch (error) {
@@ -1712,32 +1713,20 @@
         if (viewName === 'generator') {
           viewGenerator.classList.remove('hidden');
           navGenerator.classList.add('active');
-          try {
-            window.history.replaceState(null, '', window.location.pathname + '#generator');
-          } catch (e) {}
         } else if (viewName === 'pricing') {
           viewPricing.classList.remove('hidden');
           navPricing.classList.add('active');
-          try {
-            window.history.replaceState(null, '', window.location.pathname + '#pricing');
-          } catch (e) {}
         } else if (viewName === 'dashboard') {
           if (!currentUser) {
             openAuthModal('login');
             // Select home / generator tab
             viewGenerator.classList.remove('hidden');
             navGenerator.classList.add('active');
-            try {
-              window.history.replaceState(null, '', window.location.pathname + '#generator');
-            } catch (e) {}
             return;
           }
           viewDashboard.classList.remove('hidden');
           navDashboard.classList.add('active');
           renderPromptHistory();
-          try {
-            window.history.replaceState(null, '', window.location.pathname + '#dashboard');
-          } catch (e) {}
         }
       }
 
@@ -1772,118 +1761,6 @@
         }
       }
 
-      // --- Helper to resolve API paths based on host environment ---
-      function getApiUrl(path) {
-        // Since we are running a full-stack application, the frontend and Express backend
-        // are always hosted on the same origin. Returning a relative path is 100% reliable
-        // and completely avoids cross-origin CORS blocks or "Failed to fetch" errors.
-        return path;
-      }
-
-      // --- Firebase Auth & Initialization ---
-      async function initFirebase() {
-        try {
-          firebaseInitError = null;
-          
-          // Fallback loading mechanism if static script tag fails (e.g. Brave Shields / Content Blockers)
-          if (typeof firebase === 'undefined') {
-            console.log("Firebase is not loaded yet. Attempting dynamic script load with failover CDNs...");
-            const cdns = [
-              {
-                app: "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js",
-                auth: "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"
-              },
-              {
-                app: "https://cdn.jsdelivr.net/npm/firebase@10.8.0/firebase-app-compat.js",
-                auth: "https://cdn.jsdelivr.net/npm/firebase@10.8.0/firebase-auth-compat.js"
-              },
-              {
-                app: "https://unpkg.com/firebase@10.8.0/firebase-app-compat.js",
-                auth: "https://unpkg.com/firebase@10.8.0/firebase-auth-compat.js"
-              }
-            ];
-
-            let loaded = false;
-            for (const cdn of cdns) {
-              try {
-                await loadScript(cdn.app);
-                await loadScript(cdn.auth);
-                if (typeof firebase !== 'undefined') {
-                  loaded = true;
-                  console.log(`Successfully loaded Firebase from CDN: ${cdn.app}`);
-                  break;
-                }
-              } catch (e) {
-                console.warn(`Could not load Firebase from ${cdn.app}, trying next...`, e);
-              }
-            }
-
-            if (!loaded) {
-              throw new Error("Firebase SDK script failed to load from all CDNs. This is typically caused by an adblocker, Brave Shields, or content-blocking browser extensions. Please disable Shields/adblockers for this site and refresh.");
-            }
-          }
-
-          // Use static configuration directly to support static HTML environments cleanly
-          const config = {
-            projectId: "gen-lang-client-0844549707",
-            appId: "1:845800015860:web:a6229be704605991785ba1",
-            apiKey: "AIzaSyCFyGzp7viV1tq25DAMnpKKSJpPngtVa14",
-            authDomain: "gen-lang-client-0844549707.firebaseapp.com",
-            firestoreDatabaseId: "ai-studio-imagetogeminipro-7991f626-f4c5-4d1c-8e24-82965df261a7",
-            storageBucket: "gen-lang-client-0844549707.firebasestorage.app",
-            messagingSenderId: "845800015860"
-          };
-
-          let appInstance;
-          if (firebase.apps.length === 0) {
-            appInstance = firebase.initializeApp(config);
-          } else {
-            appInstance = firebase.app();
-          }
-          auth = firebase.auth();
-          
-          // Listen to firebase auth state changes and wait for initial resolution
-          await new Promise((resolve) => {
-            let initialCheckDone = false;
-            auth.onAuthStateChanged(async (user) => {
-              try {
-                if (user) {
-                  const idToken = await user.getIdToken();
-                  setSessionToken(idToken);
-                  await checkAuthMe();
-                } else {
-                  // If user is null, they might have signed in using custom email/password
-                  // So we check if there is an existing session token, and try to verify it first.
-                  const existingToken = getSessionToken();
-                  if (existingToken) {
-                    await checkAuthMe();
-                  }
-                  
-                  // If we still don't have a currentUser, then clear everything
-                  if (!currentUser) {
-                    setSessionToken(null);
-                    currentUser = null;
-                    updateUserUI();
-                  }
-                }
-              } catch (e) {
-                console.error("Error in onAuthStateChanged handler:", e);
-              } finally {
-                if (!initialCheckDone) {
-                  initialCheckDone = true;
-                  resolve();
-                }
-              }
-            });
-          });
-        } catch (err) {
-          console.error("Firebase initialization failed:", err);
-          firebaseInitError = err.message || "Firebase initialization failed.";
-          authErrorMsg.textContent = firebaseInitError;
-          authErrorMsg.classList.remove('hidden');
-        }
-      }
-
       // --- Auth Forms Submission Handlers ---
       async function handleAuthSubmit(event) {
         event.preventDefault();
@@ -1893,44 +1770,40 @@
         const password = authInputPassword.value;
         const username = authInputUsername.value.trim();
         
+        const payload = currentAuthTab === 'signup' 
+          ? { username, email, password }
+          : { email, password };
+          
+        const endpoint = currentAuthTab === 'signup' 
+          ? '/api/auth/signup' 
+          : '/api/auth/login';
+          
         try {
           authSubmitBtn.disabled = true;
           authSubmitBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Processing...`;
           
-          if (currentAuthTab === 'signup') {
-            const res = await fetch(getApiUrl('/api/auth/custom-signup'), {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ username, email, password })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-              throw new Error(data.error || "Signup failed.");
-            }
-            setSessionToken(data.token);
-            await checkAuthMe();
-            closeAuthModal();
-            showToast('Authentication Successful', `Welcome, ${username}!`);
-            showView('generator');
-          } else {
-            const res = await fetch(getApiUrl('/api/auth/custom-login'), {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, password })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-              throw new Error(data.error || "Login failed.");
-            }
-            setSessionToken(data.token);
-            await checkAuthMe();
-            closeAuthModal();
-            showToast('Authentication Successful', `Welcome back, ${data.user.username || 'User'}!`);
-            showView('generator');
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Authentication failed');
           }
           
+          setSessionToken(data.token);
+          currentUser = data.user;
+          updateUserUI();
+          closeAuthModal();
+          showToast('Authentication Successful', `Welcome back, ${currentUser.username || 'User'}!`);
+          
+          // Redirect to generator if they just logged in
+          showView('generator');
+          
         } catch (err) {
-          authErrorMsg.textContent = err.message || "Authentication failed. Please check your credentials.";
+          authErrorMsg.textContent = err.message;
           authErrorMsg.classList.remove('hidden');
         } finally {
           authSubmitBtn.disabled = false;
@@ -1938,18 +1811,17 @@
         }
       }
 
-      // --- Google Sign-In Handler ---
-      function handleGoogleSignIn() {
-        signInWithGoogle();
-      }
-
       // --- Log Out Handler ---
       async function handleLogout() {
-        if (auth) {
+        const token = getSessionToken();
+        if (token) {
           try {
-            await auth.signOut();
+            await fetch('/api/auth/logout', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
           } catch(err) {
-            console.error("Firebase logout failed:", err);
+            console.error("Logout request failed:", err);
           }
         }
         setSessionToken(null);
@@ -1968,17 +1840,13 @@
           return;
         }
         try {
-          const res = await fetch(getApiUrl('/api/auth/me'), {
+          const res = await fetch('/api/auth/me', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (res.ok) {
             const data = await res.json();
             currentUser = data.user;
           } else {
-            // Token is invalid/expired
-            if (auth) {
-              await auth.signOut();
-            }
             setSessionToken(null);
             currentUser = null;
           }
@@ -1989,36 +1857,6 @@
         updateUserUI();
       }
 
-      // --- Anonymous & Pricing Modal Storage Helpers ---
-      function getAnonymousCredits() {
-        const val = localStorage.getItem('anon_credits');
-        if (val === null) {
-          localStorage.setItem('anon_credits', '60');
-          return 60;
-        }
-        return parseInt(val, 10);
-      }
-
-      function setAnonymousCredits(val) {
-        localStorage.setItem('anon_credits', val.toString());
-        updateUserUI();
-      }
-
-      window.openPricingPopupModal = function() {
-        const modal = document.getElementById('pricing-popup-modal');
-        if (modal) modal.classList.remove('hidden');
-      }
-
-      window.closePricingPopupModal = function() {
-        const modal = document.getElementById('pricing-popup-modal');
-        if (modal) modal.classList.add('hidden');
-      }
-
-      window.openAuthModalFromPopup = function(tab) {
-        closePricingPopupModal();
-        openAuthModal(tab);
-      }
-
       // --- Update Header and Dashboard UI with Current User state ---
       function updateUserUI() {
         const mobUserName = document.getElementById('mobile-header-user-name');
@@ -2026,12 +1864,6 @@
         const mobNavDashboard = document.getElementById('mobile-nav-dashboard');
         const mobAuthLoggedOut = document.getElementById('mobile-auth-logged-out');
         const mobAuthLoggedIn = document.getElementById('mobile-auth-logged-in');
-
-        const genCreditsDisplay = document.getElementById('generator-credits-display');
-        const creditsVal = currentUser ? currentUser.credits : getAnonymousCredits();
-        if (genCreditsDisplay) {
-          genCreditsDisplay.textContent = creditsVal;
-        }
 
         if (currentUser) {
           authLoggedOut.classList.add('hidden');
@@ -2086,196 +1918,108 @@
         historyList.classList.remove('hidden');
         historyCountBadge.textContent = `${currentUser.promptHistory.length} prompt${currentUser.promptHistory.length > 1 ? 's' : ''}`;
         
-        historyList.innerHTML = currentUser.promptHistory.map((item, index) => {
-          const styleName = item.promptType || item.style || "Standard";
-          const instructionText = item.customInstructions || item.instructions || "";
-          const promptText = item.generatedPrompt || item.prompt || "";
-          const itemId = item.id || `hist-${index}`;
-          
-          return `
-            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3 relative hover:border-zinc-700 transition-colors">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded text-[9px] font-bold text-indigo-400 uppercase tracking-wider font-mono">${styleName}</span>
-                  <span class="text-[10px] text-zinc-500 font-mono">${formatTimestamp(item.timestamp)}</span>
-                </div>
-                <button onclick="copyHistoryPrompt('${itemId}', ${index})" class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-transparent border-0 cursor-pointer" id="copy-history-${itemId}">
-                  <i class="fa-solid fa-copy text-[10px]"></i> Copy
-                </button>
+        historyList.innerHTML = currentUser.promptHistory.map(item => `
+          <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3 relative hover:border-zinc-700 transition-colors">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded text-[9px] font-bold text-indigo-400 uppercase tracking-wider font-mono">${item.style}</span>
+                <span class="text-[10px] text-zinc-500 font-mono">${formatTimestamp(item.timestamp)}</span>
               </div>
-              
-              ${instructionText ? `
-                <div class="text-xs text-zinc-500 font-mono italic">
-                  <span class="text-zinc-600">Guideline:</span> ${instructionText}
-                </div>
-              ` : ''}
-
-              <p class="text-sm text-zinc-300 italic font-medium font-sans leading-relaxed">"${promptText}"</p>
+              <button onclick="copyHistoryPrompt('${item.id}')" class="text-[10px] font-bold uppercase tracking-widest text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-transparent border-0 cursor-pointer" id="copy-history-${item.id}">
+                <i class="fa-solid fa-copy text-[10px]"></i> Copy
+              </button>
             </div>
-          `;
-        }).join('');
+            
+            ${item.instructions ? `
+              <div class="text-xs text-zinc-500 font-mono italic">
+                <span class="text-zinc-600">Guideline:</span> ${item.instructions}
+              </div>
+            ` : ''}
+
+            <p class="text-sm text-zinc-300 italic font-medium font-sans leading-relaxed">"${item.prompt}"</p>
+          </div>
+        `).join('');
       }
 
       // --- Copy prompt from history list ---
-      window.copyHistoryPrompt = async function(id, index) {
-        if (!currentUser || !currentUser.promptHistory) return;
-        const item = currentUser.promptHistory[index] || currentUser.promptHistory.find(h => h.id === id);
+      window.copyHistoryPrompt = async function(id) {
+        const item = currentUser.promptHistory.find(h => h.id === id);
         if (!item) return;
-        const promptText = item.generatedPrompt || item.prompt || "";
         
         try {
-          await navigator.clipboard.writeText(promptText);
+          await navigator.clipboard.writeText(item.prompt);
           const btn = document.getElementById(`copy-history-${id}`);
-          if (btn) {
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i> Copied!`;
-            btn.classList.add('text-emerald-400');
-            btn.classList.remove('text-indigo-400');
-            
-            setTimeout(() => {
-              btn.innerHTML = originalHTML;
-              btn.classList.remove('text-emerald-400');
-              btn.classList.add('text-indigo-400');
-            }, 2000);
-          }
+          const originalHTML = btn.innerHTML;
+          btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i> Copied!`;
+          btn.classList.add('text-emerald-400');
+          btn.classList.remove('text-indigo-400');
+          
+          setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('text-emerald-400');
+            btn.classList.add('text-indigo-400');
+          }, 2000);
         } catch(e) {
           showToast('Failed to copy', 'Clipboard write error.');
         }
       }
 
-      let sandboxTarget = null; // { price, credits, currency, orderId }
-
-      window.startRazorpayCheckout = async function(price, credits, currency = 'USD') {
+      // --- checkout modal launcher ---
+      window.startCheckout = function(price, credits) {
         if (!currentUser) {
           openAuthModal('signup');
           showToast('Sign Up Required', 'Please create an account to purchase credits.');
           return;
         }
-
-        try {
-          showToast('Processing', 'Contacting secure payment gateway...');
-          const token = getSessionToken();
-          
-          // 1. Fetch Razorpay configuration first to see if sandbox mode is active
-          const configRes = await fetch(getApiUrl('/api/payment/razorpay-config'));
-          const configData = await configRes.json();
-          
-          // 2. Create the order on the backend
-          const orderRes = await fetch(getApiUrl('/api/payment/create-order'), {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ amount: price, credits: credits, currency: currency })
-          });
-          
-          const orderData = await orderRes.json();
-          if (!orderRes.ok) {
-            throw new Error(orderData.error || 'Failed to initialize payment order');
-          }
-
-          if (orderData.isSandbox) {
-            // Show custom Sandbox helper modal
-            sandboxTarget = { price, credits, currency, orderId: orderData.orderId };
-            document.getElementById('sandbox-item-title').textContent = `${credits} Prompt Credits Pack`;
-            document.getElementById('sandbox-item-price').textContent = currency === 'INR' ? `₹${price}` : `$${price.toFixed(2)}`;
-            document.getElementById('sandbox-checkout-modal').classList.remove('hidden');
-            return;
-          }
-
-          // 3. Launch Real Razorpay Checkout!
-          const options = {
-            key: configData.keyId,
-            amount: orderData.amount,
-            currency: orderData.currency,
-            name: "GeminiPrompt Generator",
-            description: `${credits} Credits Pack`,
-            image: "https://unpkg.com/lucide-static@0.330.0/icons/sparkles.png",
-            order_id: orderData.orderId,
-            handler: function (response) {
-              verifyRazorpayPaymentOnBackend(response, credits, false);
-            },
-            prefill: {
-              name: currentUser.username,
-              email: currentUser.email
-            },
-            theme: {
-              color: "#6366f1" // indigo primary
-            }
-          };
-
-          const rzp = new window.Razorpay(options);
-          rzp.open();
-
-        } catch (err) {
-          showToast('Payment Error', err.message || 'Failed to start checkout');
-        }
+        checkoutTarget = { price, credits };
+        checkoutItemTitle.textContent = `${credits} Prompt Credits Pack`;
+        checkoutItemPrice.textContent = `$${price.toFixed(2)}`;
+        checkoutModal.classList.remove('hidden');
       }
-
-      window.closeSandboxCheckoutModal = function() {
-        document.getElementById('sandbox-checkout-modal').classList.add('hidden');
-        sandboxTarget = null;
+      
+      window.closeCheckoutModal = function() {
+        checkoutModal.classList.add('hidden');
+        checkoutTarget = null;
       }
-
-      window.executeSandboxCheckout = async function() {
-        if (!sandboxTarget) return;
-        const payBtn = document.getElementById('sandbox-pay-btn');
-        const originalText = payBtn.innerHTML;
+      
+      window.executeCheckout = async function() {
+        if (!checkoutTarget || !currentUser) return;
+        
+        const token = getSessionToken();
+        const payBtn = document.getElementById('checkout-pay-btn');
+        const originalBtnHTML = payBtn.innerHTML;
         
         try {
           payBtn.disabled = true;
-          payBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Simulating callback...`;
+          payBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Confirming payment...`;
           
-          const dummyResponse = {
-            razorpay_order_id: sandboxTarget.orderId,
-            razorpay_payment_id: "pay_sim_" + Math.random().toString(36).substring(2, 12),
-            razorpay_signature: "signature_sim_verified"
-          };
-          
-          await verifyRazorpayPaymentOnBackend(dummyResponse, sandboxTarget.credits, true);
-          closeSandboxCheckoutModal();
-        } catch (err) {
-          showToast('Sandbox Verification Failed', err.message);
-        } finally {
-          payBtn.disabled = false;
-          payBtn.innerHTML = originalText;
-        }
-      }
-
-      async function verifyRazorpayPaymentOnBackend(response, credits, isSandbox) {
-        const token = getSessionToken();
-        try {
-          showToast('Verifying', 'Securing payment ledger...');
-          
-          const verifyRes = await fetch(getApiUrl('/api/payment/verify'), {
+          const res = await fetch('/api/user/add-credits', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              credits: credits,
-              isSandbox: isSandbox
-            })
+            body: JSON.stringify({ amount: checkoutTarget.price })
           });
-
-          const data = await verifyRes.json();
-          if (!verifyRes.ok) {
-            throw new Error(data.error || 'Signature validation failed');
+          
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Payment transaction failed');
           }
-
+          
+          // Update local state credits and history log
           currentUser.credits = data.credits;
           currentUser.promptHistory = data.promptHistory;
           updateUserUI();
-          showToast('Payment Completed', `Success! Credited ${data.added} prompt generations.`);
+          closeCheckoutModal();
+          showToast('Purchase Successful', `Success! Added ${data.added} credits to your account.`);
           showView('dashboard');
-        } catch (err) {
-          showToast('Verification Failed', err.message || 'Failed to verify transaction signature');
-          throw err;
+          
+        } catch(err) {
+          showToast('Transaction Failed', err.message);
+        } finally {
+          payBtn.disabled = false;
+          payBtn.innerHTML = originalBtnHTML;
         }
       }
 
@@ -2338,30 +2082,8 @@
       window.toggleTheme = toggleTheme;
       window.toggleMobileMenu = toggleMobileMenu;
 
-      // Run profile loader and Firebase initialization on page start
-      initFirebase().then(() => {
-        const path = window.location.pathname;
-        const hash = window.location.hash;
-        if (path.includes('dashboard.html') || path.includes('dashboard') || hash.includes('dashboard')) {
-          showView('dashboard');
-        } else if (path.includes('pricing') || hash.includes('pricing')) {
-          showView('pricing');
-        } else {
-          showView('generator');
-        }
-      });
-
-      // Handle browser back/forward navigation using URL hashes
-      window.addEventListener('hashchange', () => {
-        const hash = window.location.hash;
-        if (hash.includes('dashboard')) {
-          showView('dashboard');
-        } else if (hash.includes('pricing')) {
-          showView('pricing');
-        } else {
-          showView('generator');
-        }
-      });
+      // Run profile loader on page start
+      checkAuthMe();
     </script>
   </body>
 </html>
