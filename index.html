@@ -15,6 +15,9 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Tailwind CSS Stylesheet -->
+    <link rel="stylesheet" href="/src/index.css">
+    
     <!-- Complete, highly optimized custom CSS styling compiled locally inside style tag -->
     <style>
       /* Reset & Base Setup */
@@ -25,33 +28,33 @@
       }
       
       :root {
-        --bg-main: #0c0a1c; /* Luxury deep amethyst black */
-        --bg-card: rgba(26, 21, 44, 0.55); /* Elegant translucent violet-tinted slate */
-        --bg-inner: #130f26; /* Deep violet-gray inner */
-        --border-color: rgba(139, 92, 246, 0.25); /* Bright, clean lavender border */
-        --text-primary: #f5f3ff; /* Crisp lavender-tinted white */
-        --text-secondary: #c084fc; /* Vibrant violet-lavender for accents */
-        --text-muted: #8b5cf6; /* Strong violet color */
-        --accent: #8b5cf6; /* Ultra luxury Royal Violet accent color */
-        --accent-hover: #a78bfa; /* Bright light lavender hover */
-        --accent-light: rgba(139, 92, 246, 0.12); /* Translucent premium violet halo */
-        --emerald: #a78bfa;
+        --bg-main: #09090b;
+        --bg-card: rgba(24, 24, 27, 0.5);
+        --bg-inner: #18181b;
+        --border-color: rgba(39, 39, 42, 0.8);
+        --text-primary: #f4f4f5;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --accent: #128c7e;
+        --accent-hover: #25d366;
+        --accent-light: rgba(37, 211, 102, 0.1);
+        --emerald: #25d366;
         --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         --font-mono: 'JetBrains Mono', monospace;
       }
 
       html.light-mode {
-        --bg-main: #f5f3ff; /* Clean light lavender background */
-        --bg-card: rgba(237, 233, 254, 0.65); /* Soft white-purple cards */
+        --bg-main: #f9fafb;
+        --bg-card: rgba(243, 244, 246, 0.65);
         --bg-inner: #ffffff;
-        --border-color: rgba(124, 58, 237, 0.15);
-        --text-primary: #1e1b4b; /* Deep violet navy for strong readability */
-        --text-secondary: #6d28d9; /* Deep violet */
-        --text-muted: #7c3aed;
-        --accent: #7c3aed;
-        --accent-hover: #6d28d9;
-        --accent-light: rgba(124, 58, 237, 0.12);
-        --emerald: #7c3aed;
+        --border-color: rgba(229, 231, 235, 0.9);
+        --text-primary: #111827;
+        --text-secondary: #4b5563;
+        --text-muted: #9ca3af;
+        --accent: #128c7e;
+        --accent-hover: #25d366;
+        --accent-light: rgba(37, 211, 102, 0.15);
+        --emerald: #25d366;
       }
 
       html.light-mode .bg-zinc-950,
@@ -110,7 +113,7 @@
       }
 
       html.light-mode .form-input:focus {
-        border-color: var(--accent) !important;
+        border-color: #128c7e !important;
       }
 
       html.light-mode select,
@@ -158,262 +161,6 @@
         background-size: 16px 16px;
       }
 
-      /* Pure CSS Utility Framework Replacement */
-      .flex { display: flex; }
-      .flex-col { flex-direction: column; }
-      .flex-row { flex-direction: row; }
-      .items-center { align-items: center; }
-      .justify-between { justify-content: space-between; }
-      .justify-center { justify-content: center; }
-      .flex-grow { flex-grow: 1; }
-      .flex-wrap { flex-wrap: wrap; }
-      .shrink-0 { flex-shrink: 0; }
-      
-      .grid { display: grid; }
-      .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-      
-      @media (min-width: 1024px) {
-        .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-        .lg\:col-span-7 { grid-column: span 7 / span 7; }
-        .lg\:col-span-5 { grid-column: span 5 / span 5; }
-      }
-      
-      .gap-1\.5 { gap: 0.375rem; }
-      .gap-2 { gap: 0.5rem; }
-      .gap-2\.5 { gap: 0.625rem; }
-      .gap-3 { gap: 0.75rem; }
-      .gap-4 { gap: 1rem; }
-      .gap-6 { gap: 1.5rem; }
-      .items-stretch { align-items: stretch; }
-      
-      /* Sizing and Spacers */
-      .w-full { width: 100%; }
-      .h-full { height: 100%; }
-      .min-h-screen { min-height: 100vh; }
-      .max-w-7xl { max-width: 80rem; }
-      .mx-auto { margin-left: auto; margin-right: auto; }
-      .mt-auto { margin-top: auto; }
-      .mt-0\.5 { margin-top: 0.125rem; }
-      .mb-1 { margin-bottom: 0.25rem; }
-      .mb-2 { margin-bottom: 0.5rem; }
-      .mb-3 { margin-bottom: 0.75rem; }
-      .mb-4 { margin-bottom: 1rem; }
-      .mb-6 { margin-bottom: 1.5rem; }
-      
-      .w-10 { width: 2.5rem; }
-      .h-10 { height: 2.5rem; }
-      .h-20 { height: 5rem; }
-      .h-8 { height: 2rem; }
-      .w-4 { width: 1rem; }
-      .h-4 { height: 1rem; }
-      .w-5 { width: 1.25rem; }
-      .h-5 { height: 1.25rem; }
-      .w-64 { width: 16rem; }
-      .h-64 { height: 16rem; }
-      .w-\[1px\] { width: 1px; }
-      
-      .min-h-\[350px\] { min-height: 350px; }
-      .min-h-\[380px\] { min-height: 380px; }
-      .min-h-\[140px\] { min-height: 140px; }
-      .max-h-\[480px\] { max-height: 480px; }
-      .max-h-\[140px\] { max-height: 140px; }
-      
-      /* Padding Utility library */
-      .p-1 { padding: 0.25rem; }
-      .p-1\.5 { padding: 0.375rem; }
-      .p-2\.5 { padding: 0.625rem; }
-      .p-3 { padding: 0.75rem; }
-      .p-4 { padding: 1rem; }
-      .p-5 { padding: 1.25rem; }
-      .p-6 { padding: 1.5rem; }
-      .p-8 { padding: 2rem; }
-      .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
-      .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-      .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
-      .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
-      .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-      .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
-      .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-      .py-3\.5 { padding-top: 0.875rem; padding-bottom: 0.875rem; }
-      .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-      .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
-      .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-      .px-4 { padding-left: 1rem; padding-right: 1rem; }
-      .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
-      .px-8 { padding-left: 2rem; padding-right: 2rem; }
-      
-      @media (min-width: 640px) {
-        .sm\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-        .sm\:p-8 { padding: 2rem; }
-        .sm\:flex-row { flex-direction: row; }
-        .sm\:w-auto { width: auto; }
-      }
-      @media (min-width: 1024px) {
-        .lg\:px-8 { padding-left: 2rem; padding-right: 2rem; }
-        .lg\:py-8 { padding-top: 2rem; padding-bottom: 2rem; }
-      }
-      
-      /* Borders & Corners styling */
-      .border { border: 1px solid #27272a; }
-      .border-b { border-bottom: 1px solid #18181b; }
-      .border-t { border-top: 1px solid #18181b; }
-      .border-dashed { border-style: dashed; }
-      .border-zinc-900 { border-color: #18181b; }
-      .border-zinc-800\/80 { border-color: rgba(39, 39, 42, 0.8); }
-      .border-zinc-800\/60 { border-color: rgba(39, 39, 42, 0.6); }
-      .border-zinc-800 { border-color: #27272a; }
-      .border-zinc-700\/60 { border-color: rgba(63, 63, 70, 0.6); }
-      .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.2); }
-      
-      .rounded-lg { border-radius: 0.5rem; }
-      .rounded-xl { border-radius: 0.75rem; }
-      .rounded-2xl { border-radius: 1rem; }
-      .rounded-\[2rem\] { border-radius: 2rem; }
-      .rounded-\[2\.5rem\] { border-radius: 2.5rem; }
-      
-      /* Typography System */
-      .font-sans { font-family: var(--font-sans); }
-      .font-mono { font-family: var(--font-mono); }
-      
-      .text-xs { font-size: 0.75rem; }
-      .text-sm { font-size: 0.875rem; }
-      .text-base { font-size: 1rem; }
-      .text-lg { font-size: 1.125rem; }
-      .text-xl { font-size: 1.25rem; }
-      .text-\[10px\] { font-size: 10px; }
-      .text-\[9px\] { font-size: 9px; }
-      
-      .font-bold { font-weight: 700; }
-      .font-semibold { font-weight: 600; }
-      .font-medium { font-weight: 500; }
-      .font-black { font-weight: 900; }
-      
-      .uppercase { text-transform: uppercase; }
-      .italic { font-style: italic; }
-      .tracking-tight { letter-spacing: -0.025em; }
-      .tracking-tighter { letter-spacing: -0.05em; }
-      .tracking-wide { letter-spacing: 0.025em; }
-      .tracking-widest { letter-spacing: 0.1em; }
-      .leading-none { line-height: 1; }
-      .leading-relaxed { line-height: 1.625; }
-      
-      /* Colors and Tones */
-      .text-zinc-100 { color: #f4f4f5; }
-      .text-zinc-200 { color: #e4e4e7; }
-      .text-zinc-300 { color: #d4d4d8; }
-      .text-zinc-400 { color: #a1a1aa; }
-      .text-zinc-500 { color: #71717a; }
-      .text-zinc-600 { color: #52525b; }
-      .text-zinc-700 { color: #3f3f46; }
-      .text-indigo-500 { color: #6366f1; }
-      .text-indigo-400 { color: #818cf8; }
-      .text-emerald-400 { color: var(--accent); }
-      .text-rose-400 { color: #f87171; }
-      
-      /* Solid & Semi-transparent Background classes */
-      .bg-zinc-950 { background-color: #09090b; }
-      .bg-zinc-900\/50 { background-color: rgba(24, 24, 27, 0.5); }
-      .bg-zinc-900\/20 { background-color: rgba(24, 24, 27, 0.2); }
-      .bg-zinc-900\/80 { background-color: rgba(24, 24, 27, 0.8); }
-      .bg-zinc-900\/60 { background-color: rgba(24, 24, 27, 0.6); }
-      .bg-zinc-900 { background-color: #18181b; }
-      .bg-zinc-800 { background-color: #27272a; }
-      .bg-zinc-800\/80 { background-color: rgba(39, 39, 42, 0.8); }
-      .bg-zinc-800\/60 { background-color: rgba(39, 39, 42, 0.6); }
-      .bg-zinc-800\/40 { background-color: rgba(39, 39, 42, 0.4); }
-      .bg-indigo-600 { background-color: #4f46e5; }
-      .bg-indigo-900\/5 { background-color: rgba(49, 46, 129, 0.05); }
-      .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.1); }
-      
-      /* Layout & Structural Layout Elements */
-      .sticky { position: sticky; }
-      .top-0 { top: 0; }
-      .z-40 { z-index: 40; }
-      .z-50 { z-index: 50; }
-      .relative { position: relative; }
-      .absolute { position: absolute; }
-      .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-      .overflow-hidden { overflow: hidden; }
-      .overflow-y-auto { overflow-y: auto; }
-      .blur-3xl { filter: blur(64px); }
-      .pointer-events-none { pointer-events: none; }
-      
-      /* Interactive States & Transitions */
-      .ratio-btn, .modifier-btn {
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-      .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-      .duration-200 { transition-duration: 200ms; }
-      .duration-350 { transition-duration: 350ms; }
-      
-      .hover\:bg-indigo-500:hover { background-color: var(--accent-hover); }
-      .hover\:bg-zinc-750:hover { background-color: rgba(139, 92, 246, 0.08); }
-      .hover\:bg-zinc-700\/80:hover { background-color: rgba(139, 92, 246, 0.12); }
-      .hover\:text-zinc-100:hover { color: #ffffff; }
-      .hover\:scale-\[1\.02\]:hover { transform: scale(1.02); }
-      .hover\:border-indigo-500\/50:hover { border-color: var(--accent); }
-      .hover\:text-white:hover { color: #ffffff; }
-      .hover\:text-zinc-200:hover { color: #ffffff; }
-      .active\:scale-95:active { transform: scale(0.95); }
-      
-      /* Dynamic classes added & modified by Javascript */
-      .bg-indigo-600 { background-color: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
-      .text-white { color: #ffffff !important; }
-      .border-indigo-600 { border-color: var(--accent) !important; }
-      .bg-zinc-800 { background-color: rgba(139, 92, 246, 0.08) !important; color: var(--text-primary) !important; border-color: var(--border-color) !important; }
-      .text-zinc-300 { color: var(--text-secondary) !important; }
-      
-      .bg-indigo-950\/60 { background-color: var(--accent-light) !important; color: var(--accent) !important; border-color: var(--border-color) !important; }
-      .text-indigo-400 { color: var(--accent) !important; }
-      .border-indigo-500\/50 { border-color: var(--border-color) !important; }
-      
-      .bg-zinc-800\/60 { background-color: rgba(26, 21, 44, 0.4) !important; color: var(--text-secondary) !important; border-color: var(--border-color) !important; }
-      .text-zinc-400 { color: var(--text-secondary) !important; }
-      .border-zinc-800 { border-color: var(--border-color) !important; }
-      
-      /* Loading & State badges toggled by JS */
-      .bg-indigo-950 { background-color: var(--accent-light) !important; border-color: var(--border-color) !important; color: var(--accent) !important; }
-      .border-indigo-900 { border-color: var(--border-color) !important; }
-      .bg-emerald-950 { background-color: var(--accent-light) !important; border-color: var(--border-color) !important; color: var(--accent) !important; }
-      .border-emerald-900 { border-color: var(--border-color) !important; }
-      
-      /* Button Copy States */
-      .bg-emerald-600 { background-color: #6d28d9 !important; }
-      .hover\:bg-emerald-500:hover { background-color: #7c3aed !important; }
-
-      /* Animation keyframes */
-      .animate-spin {
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-      
-      .animate-pulse {
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: .5; }
-      }
-      
-      /* Depth & Shadows */
-      .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-      .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-      .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-      .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
-      .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.15); }
-      .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
-      
-      /* Helpful Classes */
-      .hidden { display: none !important; }
-      .cursor-pointer { cursor: pointer; }
-      .cursor-not-allowed { cursor: not-allowed; }
-      .select-text { user-select: text; }
-      .text-left { text-align: left; }
-      .whitespace-pre-wrap { white-space: pre-wrap; }
-
       /* Custom Nav & Tabs Style */
       .nav-link {
         color: var(--text-secondary);
@@ -429,14 +176,14 @@
       }
       .nav-link:hover {
         color: var(--text-primary);
-        background-color: var(--accent-light);
+        background-color: rgba(255, 255, 255, 0.05);
       }
        .nav-link.active {
-        background-color: var(--accent-light);
-        color: var(--accent) !important;
+        background-color: rgba(37, 211, 102, 0.15);
+        color: #25d366 !important;
       }
 
-      /* Global Icon & Support rules for Violet shades standardization */
+      /* Global Icon & Support rules for WhatsApp green standardization */
       header i,
       main i,
       footer i,
@@ -447,7 +194,7 @@
       #output-container i,
       #view-dashboard i,
       #view-pricing i {
-        color: var(--accent) !important;
+        color: #25d366 !important;
       }
       button.bg-indigo-600 i,
       button.bg-emerald-600 i,
@@ -466,7 +213,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: rgba(12, 10, 28, 0.85);
+        background-color: rgba(9, 9, 11, 0.85);
         backdrop-filter: blur(8px);
         z-index: 100;
         display: flex;
@@ -475,8 +222,8 @@
         padding: 1rem;
       }
       .modal-content {
-        background-color: var(--bg-inner);
-        border: 1px solid var(--border-color);
+        background-color: #18181b;
+        border: 1px solid rgba(63, 63, 70, 0.8);
         border-radius: 1.5rem;
         width: 100%;
         max-width: 440px;
@@ -492,22 +239,22 @@
       /* Form inputs */
       .form-input {
         width: 100%;
-        background-color: rgba(12, 10, 28, 0.5);
-        border: 1px solid var(--border-color);
+        background-color: #09090b;
+        border: 1px solid #27272a;
         border-radius: 0.75rem;
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
-        color: var(--text-primary);
+        color: #f4f4f5;
         outline: none;
         transition: border-color 0.2s;
       }
       .form-input:focus {
-        border-color: var(--accent);
+        border-color: #25d366;
       }
 
       /* Pricing Card badge */
       .popular-badge {
-        background: linear-gradient(135deg, #7c3aed, #c084fc);
+        background: linear-gradient(135deg, #128c7e, #25d366);
         color: #ffffff;
         font-size: 0.65rem;
         font-weight: 700;
@@ -527,7 +274,7 @@
           <img src="https://geminipromptgenerator.online/blog/wp-content/uploads/2026/07/logo-2.webp" alt="Logo" class="h-10 w-auto object-contain" referrerPolicy="no-referrer" />
           <div class="hidden sm:block">
             <h1 class="text-base font-bold tracking-tight text-zinc-100 uppercase">
-              Gemini<span style="color: var(--accent) !important;">Prompt</span>
+              Gemini<span style="color: #25d366 !important;">Prompt</span>
             </h1>
             <p class="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold">Prompt Generator v3.5</p>
           </div>
@@ -646,7 +393,7 @@
                 <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400">Source Image Workspace</h2>
               </div>
               <span id="image-status-badge" class="hidden text-\[10px\] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-emerald-500\/10 text-emerald-400 border border-emerald-500\/20">
-                Ready to crop
+                Image Uploaded
               </span>
             </div>
 
@@ -663,61 +410,17 @@
               </button>
             </div>
 
-            <!-- Cropper Workspace Container (Hidden until image is loaded) -->
+            <!-- Image Preview Workspace Container (Hidden until image is loaded) -->
             <div id="cropper-workspace" class="hidden flex flex-col gap-4 flex-grow">
-              <div class="cropper-container-wrapper rounded-2xl overflow-hidden relative border border-zinc-800 flex items-center justify-center min-h-\[350px\] max-h-\[480px\]">
-                <img id="cropper-image" src="" alt="Source Image for cropping" class="max-w-full max-h-\[480px\]" />
+              <div class="cropper-container-wrapper rounded-2xl overflow-hidden relative border border-zinc-800 flex items-center justify-center min-h-\[380px\] flex-grow">
+                <img id="cropper-image" src="" alt="Source Image" class="max-w-full max-h-\[480px\] object-contain rounded-xl" />
               </div>
 
-              <!-- Aspect Ratio Preset Controls -->
-              <div class="flex flex-col gap-2 bg-zinc-900\/80 p-4 rounded-2xl border border-zinc-800\/60">
-                <span class="text-\[10px\] font-bold uppercase tracking-widest text-zinc-500">Aspect Ratio Selector</span>
-                <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-                  <button type="button" data-aspect-ratio="NaN" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
-                    Free Form
-                  </button>
-                  <button type="button" data-aspect-ratio="1" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
-                    1:1 Sq
-                  </button>
-                  <button type="button" data-aspect-ratio="1.3333" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
-                    4:3 Photo
-                  </button>
-                  <button type="button" data-aspect-ratio="1.7777" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
-                    16:9 Cinematic
-                  </button>
-                  <button type="button" data-aspect-ratio="0.5625" class="ratio-btn px-3 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider">
-                    9:16 Portrait
-                  </button>
-                </div>
-              </div>
-
-              <!-- Fine-Tuning Controls toolbar -->
-              <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-                <div class="flex items-center gap-1.5 bg-zinc-900\/60 p-1 rounded-xl border border-zinc-800\/60">
-                  <button type="button" id="rotate-left" title="Rotate Left 90°" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                  </button>
-                  <button type="button" id="rotate-right" title="Rotate Right 90°" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
-                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
-                  </button>
-                  <div class="h-5 w-\[1px\] bg-zinc-800 mx-1"></div>
-                  <button type="button" id="flip-h" title="Flip Horizontal" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
-                    <i data-lucide="flip-horizontal" class="w-4 h-4"></i>
-                  </button>
-                  <button type="button" id="flip-v" title="Flip Vertical" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg transition-colors">
-                    <i data-lucide="flip-vertical" class="w-4 h-4"></i>
-                  </button>
-                  <div class="h-5 w-\[1px\] bg-zinc-800 mx-1"></div>
-                  <button type="button" id="reset-crop" title="Reset Image to Default" class="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 rounded-lg transition-colors">
-                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                  </button>
-                </div>
-
-                <div>
-                  <button type="button" id="change-image-btn" class="px-4 py-2.5 bg-zinc-800\/80 hover:bg-zinc-700\/80 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700\/60 transition-all">
-                    Swap Image
-                  </button>
-                </div>
+              <!-- Action Toolbar with Swap Image button -->
+              <div class="flex items-center justify-end pt-1">
+                <button type="button" id="change-image-btn" class="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-700 transition-all cursor-pointer">
+                  Swap Image
+                </button>
               </div>
             </div>
           </div>
@@ -745,25 +448,7 @@
                 </select>
               </div>
 
-              <!-- Prompt Modifiers presets -->
-              <div class="flex flex-col gap-2.5">
-                <div class="flex items-center justify-between">
-                  <span class="text-\[10px\] font-bold uppercase tracking-widest text-zinc-500">Quick Style Modifiers</span>
-                  <button type="button" id="clear-modifiers-btn" class="text-[9px] uppercase tracking-widest text-zinc-500 hover:text-zinc-300 font-bold bg-transparent border-0 cursor-pointer">Clear All</button>
-                </div>
-                <div class="flex flex-wrap gap-1.5 max-h-\[140px\] overflow-y-auto custom-scrollbar pr-1">
-                  <!-- Lighting Presets -->
-                  <button type="button" data-modifier="dramatic golden hour lighting" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🌅 Golden Hour</button>
-                  <button type="button" data-modifier="neon cyberpunk synthwave lighting" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🌌 Cyberpunk Neon</button>
-                  <button type="button" data-modifier="moody cinematic volumetric fog and film grain" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🎬 Cinematic Moody</button>
-                  <button type="button" data-modifier="soft studio portrait lighting with bokeh background" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">📸 Studio Bokeh</button>
-                  <!-- Style presets -->
-                  <button type="button" data-modifier="ultra-detailed oil painting masterpiece art style" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🖌️ Oil Painting</button>
-                  <button type="button" data-modifier="clean minimalist line-art aesthetic" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">✏️ Line-Art</button>
-                  <button type="button" data-modifier="vibrant watercolor and ink wash illustration style" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">🎨 Watercolor Ink</button>
-                  <button type="button" data-modifier="photorealistic 8k octane render hyper-detailed texture" class="modifier-btn px-2.5 py-1.5 bg-zinc-800\/60 border border-zinc-800 text-zinc-400 hover:bg-indigo-950\/20 hover:text-indigo-400 hover:border-indigo-900\/50 rounded-lg text-xs font-medium cursor-pointer">⚡ Hyper-Real</button>
-                </div>
-              </div>
+
 
               <!-- Custom Instructions input field -->
               <div class="flex flex-col gap-2">
@@ -1114,7 +799,7 @@
           <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3 cursor-pointer" onclick="showView('generator')">
               <img src="https://geminipromptgenerator.online/blog/wp-content/uploads/2026/07/logo-2.webp" alt="Logo" class="h-8 w-auto object-contain" referrerPolicy="no-referrer" />
-              <span class="text-sm font-bold text-white uppercase tracking-tight">Gemini<span style="color: var(--accent) !important;">Prompt</span></span>
+              <span class="text-sm font-bold text-white uppercase tracking-tight">Gemini<span style="color: #25d366 !important;">Prompt</span></span>
             </div>
             <p class="text-zinc-500 text-xs leading-relaxed">
               Synthesize production-grade text-to-image prompt code directly from high-density computer vision analysis models.
@@ -1192,19 +877,9 @@
       const imageStatusBadge = document.getElementById('image-status-badge');
       const changeImageBtn = document.getElementById('change-image-btn');
 
-      // Cropper Control Buttons
-      const rotateLeftBtn = document.getElementById('rotate-left');
-      const rotateRightBtn = document.getElementById('rotate-right');
-      const flipHBtn = document.getElementById('flip-h');
-      const flipVBtn = document.getElementById('flip-v');
-      const resetCropBtn = document.getElementById('reset-crop');
-      const ratioButtons = document.querySelectorAll('.ratio-btn');
-
       // Generation Inputs
       const promptStyleSelect = document.getElementById('prompt-style');
       const customInstructionsInput = document.getElementById('custom-instructions');
-      const modifierButtons = document.querySelectorAll('.modifier-btn');
-      const clearModifiersBtn = document.getElementById('clear-modifiers-btn');
       const generateBtn = document.getElementById('generate-btn');
 
       // Outputs
@@ -1295,11 +970,6 @@
       });
 
       changeImageBtn.addEventListener('click', () => {
-        // Destroy existing cropper instance
-        if (cropperInstance) {
-          cropperInstance.destroy();
-          cropperInstance = null;
-        }
         // Reset states
         originalImageBase64 = null;
         originalMimeType = null;
@@ -1315,7 +985,7 @@
         fileInput.value = "";
       });
 
-      // --- File Reading and Cropper Setup ---
+      // --- File Reading and Preview Setup ---
       function handleSelectedFile(file) {
         if (!file.type.startsWith('image/')) {
           showToast('Unsupported format', 'Please select a valid image file.');
@@ -1328,7 +998,7 @@
         reader.onload = (e) => {
           originalImageBase64 = e.target.result;
           
-          // Show the cropper workspace
+          // Show the preview workspace
           dropZone.classList.add('hidden');
           cropperWorkspace.classList.remove('hidden');
           imageStatusBadge.classList.remove('hidden');
@@ -1336,137 +1006,10 @@
           // Setup Image
           cropperImage.src = originalImageBase64;
           
-          // Destroy old cropper if any
-          if (cropperInstance) {
-            cropperInstance.destroy();
-          }
-
-          // Initialize Cropper.js
-          setTimeout(() => {
-            cropperInstance = new Cropper(cropperImage, {
-              viewMode: 1,
-              dragMode: 'move',
-              autoCropArea: 0.9,
-              restore: false,
-              guides: true,
-              center: true,
-              highlight: false,
-              cropBoxMovable: true,
-              cropBoxResizable: true,
-              toggleDragModeOnDblclick: false,
-              ready() {
-                // Done loading
-                updateGenerateButtonState();
-              }
-            });
-          }, 50);
+          // Enable/Update Generate Button State
+          updateGenerateButtonState();
         };
         reader.readAsDataURL(file);
-      }
-
-      // --- Cropper Control Handlers ---
-      rotateLeftBtn.addEventListener('click', () => {
-        if (cropperInstance) cropperInstance.rotate(-90);
-      });
-
-      rotateRightBtn.addEventListener('click', () => {
-        if (cropperInstance) cropperInstance.rotate(90);
-      });
-
-      let isFlippedH = false;
-      flipHBtn.addEventListener('click', () => {
-        if (cropperInstance) {
-          isFlippedH = !isFlippedH;
-          cropperInstance.scaleX(isFlippedH ? -1 : 1);
-        }
-      });
-
-      let isFlippedV = false;
-      flipVBtn.addEventListener('click', () => {
-        if (cropperInstance) {
-          isFlippedV = !isFlippedV;
-          cropperInstance.scaleY(isFlippedV ? -1 : 1);
-        }
-      });
-
-      resetCropBtn.addEventListener('click', () => {
-        if (cropperInstance) {
-          cropperInstance.reset();
-          isFlippedH = false;
-          isFlippedV = false;
-          cropperInstance.scale(1, 1);
-          
-          // Reset ratio button styling
-          ratioButtons.forEach(btn => {
-            btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
-            btn.classList.add('bg-zinc-800', 'text-zinc-300');
-          });
-          ratioButtons[0].classList.remove('bg-zinc-800', 'text-zinc-300');
-          ratioButtons[0].classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
-          cropperInstance.setAspectRatio(NaN);
-        }
-      });
-
-      // Aspect Ratio Selectors Click
-      ratioButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          if (!cropperInstance) return;
-
-          // Remove active styles from all
-          ratioButtons.forEach(btn => {
-            btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
-            btn.classList.add('bg-zinc-800', 'text-zinc-300');
-          });
-
-          // Add active styles to clicked
-          button.classList.remove('bg-zinc-800', 'text-zinc-300');
-          button.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
-
-          const ratioValue = parseFloat(button.getAttribute('data-aspect-ratio'));
-          cropperInstance.setAspectRatio(isNaN(ratioValue) ? NaN : ratioValue);
-        });
-      });
-
-      // Style active Free Form ratio by default on load
-      ratioButtons[0].classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
-      ratioButtons[0].classList.remove('bg-zinc-800', 'text-zinc-300');
-
-      // --- Modifiers Selection ---
-      modifierButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const modifierText = btn.getAttribute('data-modifier');
-          
-          if (selectedModifiers.has(modifierText)) {
-            selectedModifiers.delete(modifierText);
-            btn.classList.remove('bg-indigo-950/60', 'text-indigo-400', 'border-indigo-500/50');
-            btn.classList.add('bg-zinc-800/60', 'text-zinc-400', 'border-zinc-800');
-          } else {
-            selectedModifiers.add(modifierText);
-            btn.classList.remove('bg-zinc-800/60', 'text-zinc-400', 'border-zinc-800');
-            btn.classList.add('bg-indigo-950/60', 'text-indigo-400', 'border-indigo-500/50');
-          }
-
-          updateCustomInstructionsText();
-        });
-      });
-
-      clearModifiersBtn.addEventListener('click', () => {
-        selectedModifiers.clear();
-        modifierButtons.forEach(btn => {
-          btn.classList.remove('bg-indigo-950/60', 'text-indigo-400', 'border-indigo-500/50');
-          btn.classList.add('bg-zinc-800/60', 'text-zinc-400', 'border-zinc-800');
-        });
-        customInstructionsInput.value = "";
-      });
-
-      function updateCustomInstructionsText() {
-        if (selectedModifiers.size === 0) {
-          customInstructionsInput.value = "";
-          return;
-        }
-        
-        const modifiersArray = Array.from(selectedModifiers);
-        customInstructionsInput.value = "Render style guidelines: " + modifiersArray.join(", ") + ".";
       }
 
       // --- Button Enabling State ---
@@ -1525,16 +1068,7 @@
         setLoadingState(true);
 
         try {
-          // Extract the cropped canvas image as jpeg (compressed for API transfer speed)
           let finalBase64Image = originalImageBase64;
-          if (cropperInstance) {
-            finalBase64Image = cropperInstance.getCroppedCanvas({
-              maxWidth: 1200, // Optimize size for rapid Gemini API response times
-              maxHeight: 1200,
-              imageSmoothingEnabled: true,
-              imageSmoothingQuality: 'high',
-            }).toDataURL('image/jpeg', 0.85);
-          }
 
           let response;
           const headers = {
@@ -1551,7 +1085,7 @@
               headers: headers,
               body: JSON.stringify({
                 image: finalBase64Image,
-                mimeType: 'image/jpeg',
+                mimeType: originalMimeType || 'image/jpeg',
                 promptType: promptStyleSelect.value,
                 customInstructions: customInstructionsInput.value
               })
