@@ -6,6 +6,11 @@ import dotenv from "dotenv";
 import { getAuthenticatedUser as verifyFirebaseToken, firestoreDb, generateToken, firebaseAuthSignUp, firebaseAuthSignIn, hashPassword } from "./server-firebase";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import createOrderHandler from "./api/create-order";
+import verifyPaymentHandler from "./api/verify-payment";
+import razorpayOrderHandler from "./api/razorpay/order";
+import razorpayVerifyHandler from "./api/razorpay/verify";
+import ocrHandler from "./api/ocr";
 
 dotenv.config();
 
@@ -184,6 +189,13 @@ app.post("/api/auth/custom-login", async (req, res) => {
 app.post("/api/auth/logout", (req, res) => {
   res.json({ success: true });
 });
+
+// Modular API routes
+app.post("/api/create-order", createOrderHandler);
+app.post("/api/verify-payment", verifyPaymentHandler);
+app.post("/api/razorpay/order", razorpayOrderHandler);
+app.post("/api/razorpay/verify", razorpayVerifyHandler);
+app.post("/api/ocr", ocrHandler);
 
 // Firebase Config API - Expose public configuration keys safely
 app.get("/api/firebase-config", (req, res) => {

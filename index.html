@@ -1939,6 +1939,37 @@
       }
 
       // --- Google Sign-In Handler ---
+      async function signInWithGoogle() {
+        authErrorMsg.classList.add('hidden');
+        try {
+          if (!auth) {
+            throw new Error("Firebase Authentication is not initialized yet. Please wait or refresh the page.");
+          }
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.addScope('profile');
+          provider.addScope('email');
+          
+          showToast('Google Auth', 'Opening Google Sign-In...');
+          const result = await auth.signInWithPopup(provider);
+          const user = result.user;
+          if (user) {
+            const idToken = await user.getIdToken();
+            setSessionToken(idToken);
+            await checkAuthMe();
+            closeAuthModal();
+            showToast('Authentication Successful', `Welcome, ${user.displayName || user.email}!`);
+            showView('generator');
+          }
+        } catch (err) {
+          console.error("Google Sign-In failed:", err);
+          authErrorMsg.textContent = err.message || "Google Sign-In failed.";
+          authErrorMsg.classList.remove('hidden');
+          showToast('Auth Failed', err.message || 'Google login failed.');
+        }
+      }
+
+      window.signInWithGoogle = signInWithGoogle;
+
       function handleGoogleSignIn() {
         signInWithGoogle();
       }
