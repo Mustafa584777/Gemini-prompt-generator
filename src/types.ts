@@ -4,6 +4,7 @@ export interface UserProfile {
   photoURL?: string;
   createdAt: any; // Firestore Timestamp
   lastLoginAt: any; // Firestore Timestamp
+  isPremium?: boolean;
 }
 
 export interface PromptItem {

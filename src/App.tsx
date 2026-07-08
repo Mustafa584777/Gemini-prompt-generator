@@ -21,6 +21,7 @@ import {
 } from './lib/firebase';
 import { UserProfile } from './types';
 import PromptGenerator from './components/PromptGenerator';
+import RazorpayCheckout from './components/RazorpayCheckout';
 import { 
   Sparkles, LogIn, LogOut, User as UserIcon, Calendar, 
   Mail, Shield, ArrowRight, Laptop, Server 
@@ -111,6 +112,19 @@ export default function App() {
       console.error('Logout error:', error);
     } finally {
       setIsAuthActionLoading(false);
+    }
+  };
+
+  const handlePremiumActivated = async () => {
+    if (!user) return;
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists()) {
+        setProfile(docSnap.data() as UserProfile);
+      }
+    } catch (err) {
+      console.error('Error reloading profile:', err);
     }
   };
 
@@ -319,8 +333,15 @@ export default function App() {
               </div>
             </section>
 
-            {/* Prompt Generator Core Tool Module */}
-            <main className="flex-grow py-8">
+            {/* Workspace & Payment Area */}
+            <main className="flex-grow py-8 flex flex-col gap-12">
+              <RazorpayCheckout 
+                userId={user.uid}
+                userEmail={user.email || ''}
+                userDisplayName={user.displayName || 'Explorer'}
+                isPremium={!!profile?.isPremium}
+                onPremiumActivated={handlePremiumActivated}
+              />
               <PromptGenerator userId={user.uid} />
             </main>
 
