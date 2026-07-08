@@ -109,7 +109,7 @@ export default function RazorpayCheckout({
       }
 
       // Step 2: Open Razorpay modal
-      const razorpayKey = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_live_T9oCFNHFLfTJwA';
+      const razorpayKey = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_live_TAsRhhdJwnXn7B';
 
       const options = {
         key: razorpayKey,
