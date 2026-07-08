@@ -31,12 +31,16 @@ service cloud.firestore {
     // Entity validations
     function isValidUser(data) {
       return data.keys().hasAll(['email', 'createdAt', 'lastLoginAt']) &&
-             data.keys().size() <= 5 &&
+             data.keys().size() <= 10 &&
              data.email is string && data.email.size() <= 256 &&
              data.createdAt is timestamp &&
              data.lastLoginAt is timestamp &&
              (!data.keys().hasAny(['displayName']) || (data.displayName is string && data.displayName.size() <= 256)) &&
-             (!data.keys().hasAny(['photoURL']) || (data.photoURL is string && data.photoURL.size() <= 1024));
+             (!data.keys().hasAny(['photoURL']) || (data.photoURL is string && data.photoURL.size() <= 1024)) &&
+             (!data.keys().hasAny(['isPremium']) || (data.isPremium is bool)) &&
+             (!data.keys().hasAny(['premiumPaymentId']) || (data.premiumPaymentId is string && data.premiumPaymentId.size() <= 128)) &&
+             (!data.keys().hasAny(['premiumOrderId']) || (data.premiumOrderId is string && data.premiumOrderId.size() <= 128)) &&
+             (!data.keys().hasAny(['premiumActivatedAt']) || (data.premiumActivatedAt is string && data.premiumActivatedAt.size() <= 128));
     }
 
     function isValidPrompt(data) {
@@ -53,12 +57,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId) && isValidId(userId);
       allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming()) && incoming().createdAt == request.time;
-      allow update: if isOwner(userId) && isValidId(userId) && isValidUser(incoming()) && incoming().createdAt == existing().createdAt && incoming().lastLoginAt == request.time;
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUser(incoming()) && incoming().createdAt == existing().createdAt && (incoming().lastLoginAt == request.time || incoming().lastLoginAt == existing().lastLoginAt);
     }
 
     // Rules for /users/{userId}/prompts/{promptId}
     match /users/{userId}/prompts/{promptId} {
-      allow list, get: if isOwner(userId) && isValidId(userId) && isValidId(promptId);
+      allow list: if isOwner(userId) && isValidId(userId);
+      allow get: if isOwner(userId) && isValidId(userId) && isValidId(promptId);
       allow create: if isOwner(userId) && isValidId(userId) && isValidId(promptId) && isValidPrompt(incoming()) && incoming().createdAt == request.time;
       allow delete: if isOwner(userId) && isValidId(userId) && isValidId(promptId);
     }

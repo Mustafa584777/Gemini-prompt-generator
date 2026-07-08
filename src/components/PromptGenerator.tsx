@@ -467,7 +467,7 @@ export default function PromptGenerator({ userId }: PromptGeneratorProps) {
               <span className="p-1.5 bg-zinc-800 rounded-lg text-indigo-400 flex items-center justify-center">
                 <Sliders className="w-4 h-4" />
               </span>
-              <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-400">Generator Configuration</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Generator Configuration</h2>
             </div>
 
             {/* Prompt Style Selection */}
