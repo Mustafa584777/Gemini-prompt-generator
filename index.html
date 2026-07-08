@@ -629,6 +629,7 @@
                   <span id="dashboard-role-badge" class="px-2 py-0.5 bg-indigo-950 border border-indigo-900 text-indigo-400 text-[8px] font-bold uppercase tracking-wider rounded-full">Premium User</span>
                 </div>
                 <p id="dashboard-email" class="text-zinc-500 text-xs mt-0.5">user@example.com</p>
+                <p id="dashboard-joined-wrapper" class="text-zinc-500 text-[10px] uppercase tracking-wider mt-1.5 font-mono">Joined: <span id="dashboard-joined-date" class="text-zinc-300 font-semibold">July 7, 2026</span></p>
               </div>
             </div>
 
@@ -685,47 +686,35 @@
 
     </main>
 
-    <!-- AUTH MODAL (Login / Signup) -->
+    <!-- AUTH MODAL (Google Login Only) -->
     <div id="auth-modal" class="hidden modal-backdrop">
-      <div class="modal-content border border-zinc-800">
-        <!-- Tab Switches -->
-        <div class="flex border-b border-zinc-800 bg-zinc-900/60">
-          <button id="auth-tab-login" onclick="switchAuthTab('login')" class="flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-indigo-500 text-white cursor-pointer">
-            Log In
+      <div class="modal-content border border-zinc-800 bg-zinc-950 p-8 rounded-3xl flex flex-col gap-6 max-w-sm mx-auto">
+        <div class="flex flex-col items-center text-center gap-2">
+          <div class="w-12 h-12 rounded-full bg-indigo-600/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20 mb-1">
+            <i class="fa-solid fa-shield-halved text-lg"></i>
+          </div>
+          <h3 class="text-base font-bold text-white uppercase tracking-wider">Secure Access</h3>
+          <p class="text-zinc-400 text-xs leading-relaxed">Sign in or register instantly via Google to unlock high-definition prompt generation, dashboard stats, and prompt logs.</p>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <!-- Google Sign-In Button -->
+          <button type="button" id="google-signin-btn" onclick="handleGoogleSignIn()" class="w-full py-3.5 bg-white hover:bg-zinc-100 text-zinc-900 rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg transition-all flex items-center justify-center gap-3 cursor-pointer border border-transparent hover:scale-[1.01] active:scale-95">
+            <svg class="w-4 h-4" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.5-.14 2.77-1.4 3.61v3.01h2.24c5.07-4.67 8.29-11.53 8.29-19.47z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.83-2.97c-1.07.72-2.45 1.15-4.13 1.15-3.18 0-5.88-2.15-6.84-5.04H1.4v3.1C3.38 21.31 7.42 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.16 14.24c-.25-.72-.39-1.5-.39-2.24s.14-1.52.39-2.24V6.66H1.4C.56 8.32 0 10.1 0 12s.56 3.68 1.4 5.34l3.76-3.1z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.96 1.19 15.24 0 12 0 7.42 0 3.38 2.69 1.4 6.66l3.76 3.1c.96-2.89 3.66-5.01 6.84-5.01z"/>
+            </svg>
+            Continue with Google
           </button>
-          <button id="auth-tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 cursor-pointer">
-            Sign Up
+
+          <button type="button" onclick="closeAuthModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all cursor-pointer">
+            Cancel
           </button>
         </div>
 
-        <!-- Form content -->
-        <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="p-6 flex flex-col gap-4">
-          <!-- Username field (only in signup) -->
-          <div id="auth-field-username" class="hidden flex flex-col gap-1.5">
-            <label for="auth-input-username" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Username</label>
-            <input type="text" id="auth-input-username" placeholder="e.g. prompt_wizard" class="form-input" />
-          </div>
-
-          <div class="flex flex-col gap-1.5">
-            <label for="auth-input-email" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Email Address</label>
-            <input type="email" id="auth-input-email" required placeholder="name@example.com" class="form-input" />
-          </div>
-
-          <div class="flex flex-col gap-1.5">
-            <label for="auth-input-password" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Password</label>
-            <input type="password" id="auth-input-password" required placeholder="••••••••" class="form-input" />
-          </div>
-
-          <div id="auth-error-msg" class="text-xs text-rose-400 font-medium hidden"></div>
-
-          <button type="submit" id="auth-submit-btn" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all mt-2 cursor-pointer active:scale-95">
-            Proceed
-          </button>
-
-          <button type="button" onclick="closeAuthModal()" class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-zinc-800 transition-all mt-1 cursor-pointer">
-            Cancel
-          </button>
-        </form>
+        <div id="auth-error-msg" class="text-xs text-rose-400 text-center font-medium hidden"></div>
       </div>
     </div>
 
@@ -852,10 +841,19 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Cropper.js JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    
+    <!-- Firebase Compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
       // Initialize vector icons
       lucide.createIcons();
+
+      // Firebase Globals
+      let db = null;
+      let auth = null;
 
       // State Management
       let originalImageBase64 = null;
@@ -930,6 +928,7 @@
       const dashboardUsername = document.getElementById('dashboard-username');
       const dashboardEmail = document.getElementById('dashboard-email');
       const dashboardCredits = document.getElementById('dashboard-credits');
+      const dashboardJoinedDate = document.getElementById('dashboard-joined-date');
       const historyEmpty = document.getElementById('history-empty');
       const historyList = document.getElementById('history-list');
       const historyCountBadge = document.getElementById('history-count-badge');
@@ -1064,6 +1063,18 @@
       async function generatePrompt() {
         if (!originalImageBase64) return;
 
+        if (!currentUser) {
+          openAuthModal();
+          showToast('Authentication Required', 'Please sign in with your Google account to generate prompts.');
+          return;
+        }
+
+        if (currentUser.credits <= 0) {
+          showToast('Credits Exhausted', 'You have used all your free credits. Please purchase a credit pack starting from $5.');
+          showView('pricing');
+          return;
+        }
+
         // Visual state: Loading
         setLoadingState(true);
 
@@ -1133,9 +1144,8 @@
           const data = await response.json();
           displayGeneratedPrompt(data.prompt);
           
-          if (currentUser && typeof data.credits === 'number') {
-            currentUser.credits = data.credits;
-            checkAuthMe(); // Refresh prompt history and credits dynamically
+          if (currentUser) {
+            await addPromptToFirestore(promptStyleSelect.value, customInstructionsInput.value, data.prompt);
           }
 
         } catch (error) {
@@ -1264,131 +1274,161 @@
         }
       }
 
+      // --- Firebase Auth & Firestore Logic ---
+      async function initFirebase() {
+        try {
+          const res = await fetch('/firebase-applet-config.json');
+          if (!res.ok) throw new Error("Could not load Firebase config");
+          const config = await res.json();
+          
+          // Initialize App
+          firebase.initializeApp(config);
+          auth = firebase.auth();
+          
+          if (config.firestoreDatabaseId) {
+            db = firebase.app().firestore(config.firestoreDatabaseId);
+          } else {
+            db = firebase.firestore();
+          }
+          
+          console.log("Firebase initialized successfully!");
+          
+          setupAuthListener();
+        } catch (err) {
+          console.error("Firebase initialization failed:", err);
+        }
+      }
+
+      async function setupAuthListener() {
+        if (!auth) return;
+        
+        auth.onAuthStateChanged(async (user) => {
+          if (user) {
+            const email = user.email.toLowerCase();
+            const userRef = db.collection('users').doc(email);
+            
+            try {
+              const doc = await userRef.get();
+              let joinedAt = user.metadata.creationTime || new Date().toISOString();
+              try {
+                const date = new Date(joinedAt);
+                joinedAt = date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+              } catch(e) {}
+
+              if (!doc.exists) {
+                // New user: Set initial 50 credits and metadata
+                const userData = {
+                  username: user.displayName || user.email.split('@')[0],
+                  email: email,
+                  joinedAt: joinedAt,
+                  credits: 50,
+                  promptHistory: []
+                };
+                await userRef.set(userData);
+                currentUser = userData;
+              } else {
+                // Existing user: Read from Firestore
+                const data = doc.data();
+                currentUser = {
+                  username: data.username || user.displayName || user.email.split('@')[0],
+                  email: email,
+                  joinedAt: data.joinedAt || joinedAt,
+                  credits: data.credits !== undefined ? data.credits : 50,
+                  promptHistory: data.promptHistory || []
+                };
+                
+                // Backfill joinedAt if missing
+                if (!data.joinedAt) {
+                  await userRef.update({ joinedAt: joinedAt });
+                }
+              }
+              
+              setSessionToken(user.uid);
+              updateUserUI();
+            } catch (err) {
+              console.error("Failed to fetch user data from Firestore:", err);
+              showToast("Database Error", "Unable to load user profile.");
+            }
+          } else {
+            currentUser = null;
+            setSessionToken(null);
+            updateUserUI();
+          }
+        });
+
+        // Handle Redirect Sign-In results (fallback for popup-blocked)
+        try {
+          const result = await auth.getRedirectResult();
+          if (result && result.user) {
+            showToast('Authentication Successful', `Welcome back, ${result.user.displayName || 'User'}!`);
+          }
+        } catch(e) {
+          console.error("Redirect check failed:", e);
+        }
+      }
+
+      async function handleGoogleSignIn() {
+        if (!auth) {
+          showToast('Initialization Error', 'Firebase auth is not ready yet. Please refresh.');
+          return;
+        }
+
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const signInBtn = document.getElementById('google-signin-btn');
+        const originalHTML = signInBtn.innerHTML;
+
+        try {
+          signInBtn.disabled = true;
+          signInBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-900 animate-spin border-2 border-zinc-900 border-t-transparent mr-2"></span>Connecting...`;
+          
+          try {
+            await auth.signInWithPopup(provider);
+          } catch (popupErr) {
+            console.warn("Popup blocked or failed, trying redirect fallback...", popupErr);
+            if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/iframe-auth-html-error' || popupErr.code === 'auth/operation-not-supported-in-this-environment') {
+              await auth.signInWithRedirect(provider);
+            } else {
+              throw popupErr;
+            }
+          }
+        } catch (err) {
+          console.error("Google sign in failed:", err);
+          const errMsg = document.getElementById('auth-error-msg');
+          errMsg.textContent = err.message || 'Failed to authenticate with Google.';
+          errMsg.classList.remove('hidden');
+        } finally {
+          if (signInBtn) {
+            signInBtn.disabled = false;
+            signInBtn.innerHTML = originalHTML;
+          }
+        }
+      }
+
       // --- Auth Modal Control ---
-      function openAuthModal(tab = 'login') {
+      function openAuthModal() {
         authModal.classList.remove('hidden');
-        switchAuthTab(tab);
       }
       
       function closeAuthModal() {
         authModal.classList.add('hidden');
-        authForm.reset();
-        authErrorMsg.classList.add('hidden');
-      }
-      
-      function switchAuthTab(tab) {
-        currentAuthTab = tab;
-        authErrorMsg.classList.add('hidden');
-        
-        if (tab === 'login') {
-          authTabLogin.className = "flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-indigo-500 text-white cursor-pointer";
-          authTabSignup.className = "flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 cursor-pointer";
-          authFieldUsername.classList.add('hidden');
-          authInputUsername.removeAttribute('required');
-          authSubmitBtn.textContent = "Log In";
-        } else {
-          authTabSignup.className = "flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-indigo-500 text-white cursor-pointer";
-          authTabLogin.className = "flex-1 py-4 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 cursor-pointer";
-          authFieldUsername.classList.remove('hidden');
-          authInputUsername.setAttribute('required', 'required');
-          authSubmitBtn.textContent = "Create Account";
-        }
-      }
-
-      // --- Auth Forms Submission Handlers ---
-      async function handleAuthSubmit(event) {
-        event.preventDefault();
-        authErrorMsg.classList.add('hidden');
-        
-        const email = authInputEmail.value.trim();
-        const password = authInputPassword.value;
-        const username = authInputUsername.value.trim();
-        
-        const payload = currentAuthTab === 'signup' 
-          ? { username, email, password }
-          : { email, password };
-          
-        const endpoint = currentAuthTab === 'signup' 
-          ? '/api/auth/signup' 
-          : '/api/auth/login';
-          
-        try {
-          authSubmitBtn.disabled = true;
-          authSubmitBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Processing...`;
-          
-          const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          
-          const data = await res.json();
-          if (!res.ok) {
-            throw new Error(data.error || 'Authentication failed');
-          }
-          
-          setSessionToken(data.token);
-          currentUser = data.user;
-          updateUserUI();
-          closeAuthModal();
-          showToast('Authentication Successful', `Welcome back, ${currentUser.username || 'User'}!`);
-          
-          // Redirect to generator if they just logged in
-          showView('generator');
-          
-        } catch (err) {
-          authErrorMsg.textContent = err.message;
-          authErrorMsg.classList.remove('hidden');
-        } finally {
-          authSubmitBtn.disabled = false;
-          authSubmitBtn.textContent = currentAuthTab === 'signup' ? 'Create Account' : 'Log In';
-        }
+        const errMsg = document.getElementById('auth-error-msg');
+        if (errMsg) errMsg.classList.add('hidden');
       }
 
       // --- Log Out Handler ---
       async function handleLogout() {
-        const token = getSessionToken();
-        if (token) {
+        if (auth) {
           try {
-            await fetch('/api/auth/logout', {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
+            await auth.signOut();
           } catch(err) {
-            console.error("Logout request failed:", err);
+            console.error("Firebase SignOut failed:", err);
           }
         }
-        setSessionToken(null);
         currentUser = null;
+        setSessionToken(null);
         updateUserUI();
         showView('generator');
         showToast('Logged Out', 'You have been signed out successfully.');
-      }
-
-      // --- Check Session on load ---
-      async function checkAuthMe() {
-        const token = getSessionToken();
-        if (!token) {
-          currentUser = null;
-          updateUserUI();
-          return;
-        }
-        try {
-          const res = await fetch('/api/auth/me', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            currentUser = data.user;
-          } else {
-            setSessionToken(null);
-            currentUser = null;
-          }
-        } catch(err) {
-          console.error("Me check failed:", err);
-          currentUser = null;
-        }
-        updateUserUI();
       }
 
       // --- Update Header and Dashboard UI with Current User state ---
@@ -1416,6 +1456,9 @@
           dashboardUsername.textContent = currentUser.username;
           dashboardEmail.textContent = currentUser.email;
           dashboardCredits.textContent = currentUser.credits;
+          if (dashboardJoinedDate) {
+            dashboardJoinedDate.textContent = currentUser.joinedAt || 'Unknown';
+          }
           
           renderPromptHistory();
         } else {
@@ -1426,6 +1469,46 @@
           if (mobNavDashboard) mobNavDashboard.classList.add('hidden');
           if (mobAuthLoggedOut) mobAuthLoggedOut.classList.remove('hidden');
           if (mobAuthLoggedIn) mobAuthLoggedIn.classList.add('hidden');
+        }
+      }
+
+      async function addPromptToFirestore(style, instructions, prompt) {
+        if (!currentUser || !db) return;
+        const email = currentUser.email.toLowerCase();
+        const userRef = db.collection('users').doc(email);
+        
+        const newItem = {
+          id: "prt_" + Date.now().toString() + Math.random().toString(36).substring(2, 6),
+          timestamp: new Date().toISOString(),
+          style: style,
+          instructions: instructions || "None",
+          prompt: prompt
+        };
+
+        try {
+          await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(userRef);
+            if (!doc.exists) return;
+            const data = doc.data();
+            const currentCredits = data.credits !== undefined ? data.credits : 50;
+            const history = data.promptHistory || [];
+            
+            const newCredits = Math.max(0, currentCredits - 1);
+            const newHistory = [newItem, ...history];
+            
+            transaction.update(userRef, {
+              credits: newCredits,
+              promptHistory: newHistory
+            });
+
+            // Update local state
+            currentUser.credits = newCredits;
+            currentUser.promptHistory = newHistory;
+          });
+
+          updateUserUI();
+        } catch (err) {
+          console.error("Failed to update Firestore prompt history:", err);
         }
       }
 
@@ -1517,9 +1600,8 @@
       }
       
       window.executeCheckout = async function() {
-        if (!checkoutTarget || !currentUser) return;
+        if (!checkoutTarget || !currentUser || !db) return;
         
-        const token = getSessionToken();
         const payBtn = document.getElementById('checkout-pay-btn');
         const originalBtnHTML = payBtn.innerHTML;
         
@@ -1527,26 +1609,42 @@
           payBtn.disabled = true;
           payBtn.innerHTML = `<span class="inline-block w-4 h-4 rounded-full bg-slate-400 animate-spin border-2 border-white border-t-transparent mr-2"></span>Confirming payment...`;
           
-          const res = await fetch('/api/user/add-credits', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ amount: checkoutTarget.price })
-          });
+          const email = currentUser.email.toLowerCase();
+          const userRef = db.collection('users').doc(email);
+          const doc = await userRef.get();
           
-          const data = await res.json();
-          if (!res.ok) {
-            throw new Error(data.error || 'Payment transaction failed');
+          if (!doc.exists) {
+            throw new Error('User document not found in Firestore');
           }
           
-          // Update local state credits and history log
-          currentUser.credits = data.credits;
-          currentUser.promptHistory = data.promptHistory;
+          const data = doc.data();
+          const currentCredits = data.credits !== undefined ? data.credits : 50;
+          const addedCredits = checkoutTarget.credits;
+          const newCredits = currentCredits + addedCredits;
+          
+          // Log payment in history
+          const historyItem = {
+            id: "tx_" + Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            style: "PAYMENT",
+            instructions: "Credit Purchase",
+            prompt: `Successfully purchased ${addedCredits} credits.`
+          };
+          
+          const newHistory = [historyItem, ...(data.promptHistory || [])];
+          
+          await userRef.update({
+            credits: newCredits,
+            promptHistory: newHistory
+          });
+          
+          // Update local state
+          currentUser.credits = newCredits;
+          currentUser.promptHistory = newHistory;
+          
           updateUserUI();
           closeCheckoutModal();
-          showToast('Purchase Successful', `Success! Added ${data.added} credits to your account.`);
+          showToast('Purchase Successful', `Success! Added ${addedCredits} credits to your account.`);
           showView('dashboard');
           
         } catch(err) {
@@ -1562,7 +1660,7 @@
           showToast('Active Account Found', 'You already have an active account!');
           showView('generator');
         } else {
-          openAuthModal('signup');
+          openAuthModal();
         }
       }
 
@@ -1570,8 +1668,7 @@
       window.showView = showView;
       window.openAuthModal = openAuthModal;
       window.closeAuthModal = closeAuthModal;
-      window.switchAuthTab = switchAuthTab;
-      window.handleAuthSubmit = handleAuthSubmit;
+      window.handleGoogleSignIn = handleGoogleSignIn;
       window.handleLogout = handleLogout;
 
       // --- Light Mode Switcher ---
@@ -1617,7 +1714,7 @@
       window.toggleMobileMenu = toggleMobileMenu;
 
       // Run profile loader on page start
-      checkAuthMe();
+      initFirebase();
     </script>
   </body>
 </html>
